@@ -31,7 +31,8 @@ int menu_pessoa(char c[15]);
 int menu_disciplina();
 void cadastrar_pessoa(pessoa *a);
 void listar_pessoa(pessoa a[TAM], int qtd);
-
+int buscar_pessoa(pessoa a[TAM], int qtd);
+void excluir_pessoa(pessoa a[TAM], int qtd);
 
 int main(){
 	int opcao, op_aluno, op_prof, op_disciplina, qtd_aluno = 0, qtd_prof = 0, qtd_disciplina = 0;
@@ -62,9 +63,13 @@ int main(){
 							printf("Listar Aluno\n");
 							listar_pessoa(aluno, qtd_aluno);
 							break;
-						case 3: printf("Atualizar Aluno\n"); break;
+						case 3:
+							printf("Atualizar Aluno\n");
+							break;
 						case 4:
 							printf("Excluir Aluno\n");
+							excluir_pessoa(aluno, qtd_aluno);
+							qtd_aluno--;
 							break;
 						case 5: printf("Listando Aluno por sexo\n"); break;
 						case 6: printf("Listando Aluno ordenado por nome\n"); break;
@@ -89,9 +94,13 @@ int main(){
 							printf("Listar Professor\n");
 							listar_pessoa(prof, qtd_prof);
 							break;
-						case 3: printf("Atualizar Professor\n"); break;
+						case 3:
+							printf("Atualizar Professor\n");
+							break;
 						case 4:
 							printf("Excluir Professor\n");
+							excluir_pessoa(prof, qtd_prof);
+							qtd_prof--;
 							break;
 						case 5: printf("Listando Professor por sexo\n"); break;
 						case 6: printf("Listando Professor ordenado por nome\n"); break;
@@ -182,5 +191,36 @@ void listar_pessoa(pessoa a[TAM], int qtd) {
 		printf("CPF: %s\n", a[i].cpf);
 	}
 }
-
+// retorna a posição da pessoa no vetor:
+int buscar_pessoa(pessoa a[TAM], int qtd){
+	int mat_busc;
+	printf("Insira a matrícula: ");
+	scanf("%d", &mat_busc);
+	for (int i = 0; i < qtd; i++) {
+		if (mat_busc == a[i].matricula) {
+			return i;
+		}
+	}
+	return -1;
+}
+void excluir_pessoa(pessoa a[TAM], int qtd) {
+	int pos;
+	do {
+		pos = buscar_pessoa(a, qtd);
+		if (pos < 0) {
+			printf("Matrícula não encontrada.\n");
+		} else {
+			for (int i = pos; i < qtd - 1; i++) {
+				a[i].matricula = a[i + 1].matricula;
+				strcpy(a[i].nome, a[i + 1].nome);
+				a[i].sexo = a[i + 1].sexo;
+				a[i].data_nascimento.dia = a[i + 1].data_nascimento.dia;
+				a[i].data_nascimento.mes = a[i + 1].data_nascimento.mes;
+				a[i].data_nascimento.ano = a[i + 1].data_nascimento.ano;
+				strcpy(a[i].cpf, a[i + 1].cpf);
+			}
+			printf("Matrícula Excluída com sucesso");
+		}
+	} while (pos < 0);
+}
 
