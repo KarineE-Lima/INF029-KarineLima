@@ -30,6 +30,7 @@ typedef struct disciplina{
 } disciplina;
 
 // --------- PROTÓTIPO DAS FUNÇÕES -----------
+
 // Funções Menu
 int menu_geral();
 int menu_pessoa(char c[15]);
