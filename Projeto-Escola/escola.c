@@ -35,6 +35,7 @@ typedef struct disciplina{
 int menu_geral();
 int menu_pessoa(char c[15]);
 int menu_disciplina();
+int menu_relatorio();
 
 // Funções CRUD
 void cadastrar_pessoa(pessoa *a, pessoa lista[TAM],int *qtd);
@@ -51,7 +52,7 @@ int validar_data(data d);
 int validar_cpf(char cpf[CPF]);
 
 int main(){
-	int opcao, op_aluno, op_prof, op_disciplina, qtd_aluno = 0, qtd_prof = 0, qtd_disciplina = 0;
+	int opcao, op_aluno, op_prof, op_disciplina, op_relat, qtd_aluno = 0, qtd_prof = 0, qtd_disciplina = 0;
 	pessoa aluno[TAM];
 	pessoa prof[TAM];
 	disciplina disc[TAM];
@@ -97,7 +98,9 @@ int main(){
 					strcpy(categoria, "Professores");
 					op_prof = menu_pessoa(categoria);
 					switch (op_prof) {
-						case 0: printf("Saindo do menu professor...\n"); break;
+						case 0:
+							printf("Saindo do menu professor...\n");
+							break;
 						case 1:
 							printf("Cadastro Professor\n");
 							cadastrar_pessoa(&prof[qtd_prof], prof, &qtd_prof);
@@ -139,6 +142,18 @@ int main(){
 					}
 				} while(op_disciplina != 0);
 				break;
+			case 4:
+				do {
+					printf("Outros Relatórios\n");
+					op_relat = menu_relatorio();
+					switch (op_relat) {
+						case 0: printf("Saindo do menu relatorio...\n"); break;
+						case 1: printf("Aniversariantes do Mês\n"); break;
+						case 2: printf("Buscar pessoas\n"); break;
+						default: printf("Opção Inválida!\n");
+					}
+				} while (op_relat != 0);
+				break;
 			default:
 				printf("Opção inválida!\n");
 		}
@@ -169,6 +184,7 @@ int menu_geral(){
 	printf("1 - Menu Aluno\n");
 	printf("2 - Menu Professor\n");
 	printf("3 - Menu Disciplina\n");
+	printf("4 - Outros Relatórios\n");
 	scanf("%d", &opcao);
 	return opcao;
 }
@@ -194,6 +210,16 @@ int menu_disciplina(){
 	printf("5 - Incluir aluno\n");
 	printf("6 - Excluir aluno\n");
 
+	scanf("%d", &opcao);
+	fflush(stdin);
+	return opcao;
+}
+
+int menu_relatorio() {
+	int opcao;
+	printf("0 - SAIR\n");
+	printf("1 - Lista de Aniversariantes do mês\n");
+	printf("2 - Buscar pessoas\n");
 	scanf("%d", &opcao);
 	fflush(stdin);
 	return opcao;
