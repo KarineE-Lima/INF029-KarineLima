@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 #include <ctype.h>
 #include <string.h>
 #define TAM 3
@@ -40,7 +41,9 @@ int menu_relatorio();
 // Funções CRUD
 void cadastrar_pessoa(pessoa *a, pessoa lista[TAM],int *qtd);
 void listar_pessoa(pessoa a[TAM], int qtd, char c[MAX_N]);
+void listar_aniversariantes(pessoa lista[TAM], int qtd);
 int buscar_pessoa(pessoa a[TAM], int qtd, int mat_busc);
+void unir_vetor(pessoa a[TAM], pessoa b[TAM], pessoa *U, int qtd_a, int qtd_b);
 void atualizar_pessoa(pessoa a[TAM], int qtd);
 void excluir_pessoa(pessoa a[TAM], int *qtd);
 void cadastrar_disciplina(disciplina *d, int *qtd, pessoa prof[TAM], int qtd_p);
@@ -55,6 +58,7 @@ int main(){
 	int opcao, op_aluno, op_prof, op_disciplina, op_relat, qtd_aluno = 0, qtd_prof = 0, qtd_disciplina = 0;
 	pessoa aluno[TAM];
 	pessoa prof[TAM];
+	pessoa geral[TAM + TAM];
 	disciplina disc[TAM];
 	char categoria[15];
 	do{
@@ -143,12 +147,16 @@ int main(){
 				} while(op_disciplina != 0);
 				break;
 			case 4:
+				unir_vetor(aluno, prof, geral, qtd_aluno, qtd_prof);
 				do {
 					printf("Outros Relatórios\n");
 					op_relat = menu_relatorio();
 					switch (op_relat) {
 						case 0: printf("Saindo do menu relatorio...\n"); break;
-						case 1: printf("Aniversariantes do Mês\n"); break;
+						case 1:
+							printf("Aniversariantes do Mês\n");
+							listar_aniversariantes(geral, qtd_aluno+qtd_prof);
+							break;
 						case 2: printf("Buscar pessoas\n"); break;
 						default: printf("Opção Inválida!\n");
 					}
@@ -231,6 +239,9 @@ int menu_listar(char c[MAX_N]) {
 	printf("2 - Listar %s ordenados por nome\n", c);
 	printf("3 - Listar %s ordenados por data de nascimento\n", c);
 	printf("4 - Listar %s por sexo\n", c);
+	if (!strcmp(c, "Alunos"))
+		printf("5 - Listar %s matriculados em menos de 3 disciplinas\n", c);
+
 	scanf("%d", &opcao);
 	fflush(stdin);
 	return opcao;
@@ -246,6 +257,28 @@ int validar_matricula(int matricula, pessoa lista[TAM], int qtd) {
 		}
 	}
 	return 1;
+}
+
+// Formatar nome
+void formatar_nome(char nome[MAX_N]) {
+	int i = 0;
+
+	while (nome[i] != '\0') {
+		if (nome[i] >= 'A' && nome[i] <= 'Z') {
+			nome[i] = nome[i] + 32;
+		}
+		i++;
+	}
+
+	if (nome[0] >= 'a' && nome[0] <= 'z') {
+		nome[0] = nome[0] - 32;
+	}
+
+	for (i = 1; nome[i] != '\0'; i++) {
+		if (nome[i - 1] == ' ' && nome[i] >= 'a' && nome[i] <= 'z') {
+			nome[i] = nome[i] - 32;
+		}
+	}
 }
 
 // Gênero (F/M/O)
@@ -283,10 +316,32 @@ int validar_data(data d) {
 }
 
 // CPF válido
+void formatar_cpf(char cpf_formatado[CPF], const char cpf_digitado[CPF]) {
+	char numeros[12];
+	int j = 0;
+
+
+	for (int i = 0; cpf_digitado[i] != '\0'; i++) {
+		if (cpf_digitado[i] >= '0' && cpf_digitado[i] <= '9') {
+			numeros[j++] = cpf_digitado[i];
+		}
+	}
+	numeros[j] = '\0';
+
+	if (strlen(numeros) == 11) {
+		sprintf(cpf_formatado, "%c%c%c.%c%c%c.%c%c%c-%c%c",
+				numeros[0], numeros[1], numeros[2],
+				numeros[3], numeros[4], numeros[5],
+				numeros[6], numeros[7], numeros[8],
+				numeros[9], numeros[10]);
+	} else {
+		strcpy(cpf_formatado, cpf_digitado);
+	}
+}
 int validar_cpf(char cpf[CPF]) {
 	int i, j, soma, resto;
 	int digitos[11], qtd = 0;
-
+	formatar_cpf(cpf, cpf);
 	for (i = 0; cpf[i] != '\0' && qtd < 11; i++) {
 		if (cpf[i] >= '0' && cpf[i] <= '9') {
 			digitos[qtd++] = cpf[i] - '0';
@@ -337,6 +392,7 @@ void cadastrar_pessoa(pessoa *a, pessoa lista[TAM],int *qtd){
 		printf("Insira o nome: ");
 		fgets(a->nome, MAX_N, stdin);
 		fflush(stdin);
+		formatar_nome(a->nome);
 
 		a->sexo = validar_genero();
 
@@ -371,7 +427,7 @@ void cadastrar_disciplina(disciplina *d, int *qtd, pessoa prof[TAM], int qtd_p) 
 		printf("Insira o nome da disciplina: ");
 		fgets(d->nome, MAX_N, stdin);
 		fflush(stdin);
-
+		formatar_nome(d->nome);
 		printf("Insira o codigo da disciplina: ");
 		scanf("%d", &(d->codigo));
 		fflush(stdin);
@@ -427,14 +483,19 @@ void troca(pessoa *a, pessoa *b){
 	strcpy(b->cpf, aux.cpf);
 }
 
+void copia_vetor(pessoa *a, pessoa *b, int qtd) {
+	for (int i = 0; i < qtd; i++)
+		b[i] = a[i];
+}
 //todas a funções de listar pessoa
 void imprimir_pessoa(pessoa a[TAM], int qtd, int ini) {
 	for (int i = ini; i < qtd; i++) {
-		printf("Matricula: %d\n", a[i].matricula);
+		printf("\nMatricula: %d\n", a[i].matricula);
 		printf("Nome: %s", a[i].nome);
 		printf("Sexo: %c\n", a[i].sexo);
 		printf("Data de nascimento: %02d/%02d/%02d\n", a[i].data_nascimento.dia, a[i].data_nascimento.mes, a[i].data_nascimento.ano);
 		printf("CPF: %s\n", a[i].cpf);
+		printf("\n");
 	}
 }
 //lista professor/aluno por ordem alfabética
@@ -524,6 +585,9 @@ void filtrar_sexo(pessoa a[TAM], int qtd, char c[MAX_N]){
 // modulo de listar
 void listar_pessoa(pessoa a[TAM], int qtd, char c[MAX_N]) {
 	int op_lista;
+	int aluno = strcmp(c, "Alunos");
+	pessoa copia[qtd];
+	copia_vetor(a, copia, qtd);
 	if (tam_lista(qtd) == LISTA_VAZIA) {
 		printf("Lista Vazia!\n");
 	} else {
@@ -536,19 +600,26 @@ void listar_pessoa(pessoa a[TAM], int qtd, char c[MAX_N]) {
 					break;
 				case 2:
 					printf("Listar %s ordenados por nome\n", c);
-					ord_por_nome(a, qtd);
+					ord_por_nome(copia, qtd);
 					break;
 				case 3:
 					printf("Listar %s ordenados por data de nascimento\n", c);
-					ord_por_data(a, qtd);
+					ord_por_data(copia, qtd);
 					break;
 				case 4:
 					printf("Listar %s por sexo [M/F/O]\n", c);
 					filtrar_sexo(a, qtd, c);
 					break;
+				case 5:
+					if (!strcmp(c, "Alunos")) {
+						printf("%s matriculados em menos de 3 disciplinas\n", c);
+					} else {
+						printf("Opção inválida!\n");
+					}
+					break;
 				default: printf("Opção inválida!\n");
 			}
-		} while (op_lista < 1 || op_lista > 4);
+		} while (op_lista < 1 || (op_lista > 4 && aluno != 0) || (op_lista > 5 && aluno == 0));
 	}
 
 }
@@ -565,7 +636,7 @@ int buscar_pessoa(pessoa a[TAM], int qtd, int mat_busc){
 
 // atualiza professor/aluno a partir da matricula
 void atualizar_pessoa(pessoa a[TAM], int qtd) {
-	int pos, opcao, matricula;
+	int pos, opcao, matricula, res;
 	char nome[MAX_N];
 	if (tam_lista(qtd) == LISTA_VAZIA) {
 		printf("Lista Vazia!\n");
@@ -587,30 +658,47 @@ void atualizar_pessoa(pessoa a[TAM], int qtd) {
 				fflush(stdin);
 				switch (opcao) {
 					case 1:
-						printf("Insira a nova matrícula: ");
-						scanf("%d", &a[pos].matricula);
-						fflush(stdin);
+						do {
+							printf("Insira a nova matrícula: ");
+							scanf("%d", &matricula);
+							fflush(stdin);
+							res = validar_matricula(matricula, a, qtd);
+							if (!res) {
+								printf("Matrícula já cadastrada! Digite novamente.\n");
+							} else {
+								a[pos].matricula = matricula;
+							}
+						} while (!res);
 						break;
 					case 2:
 						printf("Insira o novo nome: ");
 						fgets(nome, MAX_N, stdin);
 						fflush(stdin);
+						formatar_nome(nome);
 						strcpy(a[pos].nome, nome);
 						break;
 					case 3:
-						printf("Insira o sexo: ");
-						scanf("%c", &a[pos].sexo);
-						fflush(stdin);
+						a[pos].sexo = validar_genero();
 						break;
 					case 4:
-						printf("Insira a data de nascimento: ");
-						scanf("%d %d %d", &a[pos].data_nascimento.dia, &a[pos].data_nascimento.mes, &a[pos].data_nascimento.ano);
-						fflush(stdin);
+						do {
+							printf("Insira a data de nascimento (dd mm aaaa): ");
+							scanf("%d %d %d", &(a[pos].data_nascimento.dia), &(a[pos].data_nascimento.mes), &(a[pos].data_nascimento.ano));
+							fflush(stdin);
+							if (!validar_data(a[pos].data_nascimento)) {
+								printf("Data inválida! Digite novamente.\n");
+							}
+						} while (!validar_data(a[pos].data_nascimento));
 						break;
 					case 5:
-						printf("Insira o CPF: ");
-						fgets(a[pos].cpf, CPF, stdin);
-						fflush(stdin);
+						do {
+							printf("Insira o CPF: ");
+							fgets(a[pos].cpf, CPF, stdin);
+							fflush(stdin);
+							if (!validar_cpf(a[pos].cpf)) {
+								printf("CPF inválido! Digite novamente.\n");
+							}
+						} while (!validar_cpf(a[pos].cpf));
 						break;
 					default: printf("Opção inválida!\n");
 				}
@@ -620,6 +708,7 @@ void atualizar_pessoa(pessoa a[TAM], int qtd) {
 	}
 
 }
+
 // exclui professor/aluno a partir da matrícula
 void excluir_pessoa(pessoa a[TAM], int *qtd) {
 	int pos, matricula;
@@ -646,5 +735,48 @@ void excluir_pessoa(pessoa a[TAM], int *qtd) {
 			}
 		} while (pos < 0);
 		*qtd = *qtd - 1;
+	}
+}
+
+void unir_vetor(pessoa a[TAM], pessoa b[TAM], pessoa *U, int qtd_a, int qtd_b) {
+	int i, j, k = 0;
+	while (k < qtd_a + qtd_b) {
+		for (i = 0; i < qtd_a; i++){
+			U[k] = a[i];
+			k++;
+		}
+		for (j = 0; j < qtd_b; j++) {
+			U[k] = b[j];
+			k++;
+		}
+	}
+}
+
+// ------ OUTROS RELATÓRIOS ---------
+void listar_aniversariantes(pessoa lista[TAM], int qtd) {
+	// pegando o mes atual
+	struct tm *data_atual; //ponteiro que vai armazenar data e hora
+	time_t tempo; // variavel que vai armazenar os segundos
+	time(&tempo); // obtendo o tempo em segundos
+	data_atual = localtime(&tempo); // convetendo de segundos para o tempo local
+	int mes = data_atual->tm_mon+1; // pegando o mes atual
+
+	if (tam_lista(qtd) == LISTA_VAZIA){
+		printf("Lista vazia!\n");
+	} else {
+		int achou = 0;
+		printf("\nAniversariantes do mês %d:\n", mes);
+		for (int i = 0; i < qtd; i++) {
+			if (lista[i].data_nascimento.mes == mes) {
+				printf("- %s (Dia: %02d/%02d/%04d)\n",
+					   lista[i].nome,
+					   lista[i].data_nascimento.dia,
+					   lista[i].data_nascimento.mes,
+					   lista[i].data_nascimento.ano);
+				achou = 1;
+			}
+		}
+		if (!achou)
+			printf("Nenhum aniversariante encontrado neste mês.\n");
 	}
 }
