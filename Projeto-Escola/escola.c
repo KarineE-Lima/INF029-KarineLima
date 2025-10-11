@@ -48,7 +48,7 @@ void unir_vetor(pessoa a[TAM], pessoa b[TAM], pessoa *U, int qtd_a, int qtd_b);
 void atualizar_pessoa(pessoa a[TAM], int qtd);
 void excluir_pessoa(pessoa a[TAM], int *qtd);
 void cadastrar_disciplina(disciplina *d, int *qtd, pessoa prof[TAM], int qtd_p);
-void listar_disciplina(disciplina d[TAM], int qtd);
+void listar_disciplina(disciplina d[TAM], int qtd, int qtd_a);
 void atualizar_disciplina(disciplina d[TAM], int qtd, pessoa prof[TAM], int qtd_p);
 void incluir_aluno(disciplina *d, pessoa *a, int qtd_d, int qtd_a, int *i);
 
@@ -144,18 +144,22 @@ int main(){
 							break;
 						case 2:
 							printf("Listar Disciplina\n");
-							listar_disciplina(disc, qtd_disciplina);
+							listar_disciplina(disc, qtd_disciplina, qtd_alu_dis);
 							break;
 						case 3:
 							printf("Atualizar Disciplina\n");
 							atualizar_disciplina(disc, qtd_disciplina, prof, qtd_prof);
 							break;
-						case 4: printf("Excluir Disciplina\n"); break;
+						case 4:
+							printf("Excluir Disciplina\n");
+							break;
 						case 5:
 							printf("Incluir aluno\n");
 							incluir_aluno(&disc, &aluno, qtd_disciplina, qtd_aluno, &qtd_alu_dis);
 							break;
-						case 6: printf("Excluir aluno\n"); break;
+						case 6:
+							printf("Excluir aluno\n");
+							break;
 						default: printf("Opção inválida!\n");
 					}
 				} while(op_disciplina != 0);
@@ -480,19 +484,27 @@ void imprimir_disciplina(disciplina d[TAM], int ini, int qtd) {
 		printf("Professor: %s\n", d[i].professor.nome);
 	}
 }
-void obter_displina(disciplina d[TAM], int qtd) {
+void obter_displina(disciplina d[TAM], int qtd, int qtd_a) {
 	int codigo, pos;
 	do {
 		printf("Insira o codigo da disciplina: ");
 		scanf("%d", &codigo);
 		pos = buscar_disciplina(d, qtd, codigo);
-		imprimir_disciplina(d, pos, pos+1);
-		printf("Alunos:\n");
-		for (int i = 0; i < sizeof(d[pos].alunos); i++)
-			printf("Nome: %s\n", d[pos].alunos[i].nome);
+		if (pos < 0) {
+			printf("Disciplina não encontrada\n");
+		} else {
+			imprimir_disciplina(d, pos, pos+1);
+			if (!tam_lista(qtd_a)) {
+				printf("Nenhum aluno matriculado nessa disciplina\n");
+			} else {
+				printf("Alunos:\n");
+				for (int i = 0; i < qtd_a; i++)
+					printf("Nome: %s\n", d[pos].alunos[i].nome);
+			}
+		}
 	}while (pos < 0);
 }
-void listar_disciplina(disciplina d[TAM], int qtd) {
+void listar_disciplina(disciplina d[TAM], int qtd, int qtd_a) {
 	int op_lista;
 	if (!tam_lista(qtd)) {
 		printf("Lista Vazia!\n");
@@ -510,7 +522,7 @@ void listar_disciplina(disciplina d[TAM], int qtd) {
 					break;
 				case 2:
 					printf("Listando uma disciplina [dados + alunos]\n");
-					obter_displina(d, qtd);
+					obter_displina(d, qtd, qtd_a);
 					break;
 				case 3: printf("Listando Disciplinas que extrapolam 40 vagas\n"); break;
 				default: printf("Opção inválida!\n");
@@ -774,60 +786,60 @@ void atualizar_disciplina(disciplina d[TAM], int qtd, pessoa prof[TAM], int qtd_
             fflush(stdin);
 
             // Buscar disciplina pelo código
-            pos = buscar_disciplina(d, codigo, qtd);
-
+            pos = buscar_disciplina(d, qtd, codigo);
             if (pos < 0) {
                 printf("Código não encontrado.\n");
             } else {
-                printf("Selecione o dado a ser alterado:\n");
-                printf("1 - Nome\n");
-                printf("2 - Código\n");
-                printf("3 - Semestre\n");
-                printf("4 - Vagas\n");
-                printf("5 - Professor\n");
-                scanf("%d", &opcao);
-                fflush(stdin);
-
-                switch (opcao) {
-                    case 1:
-                        printf("Insira o novo nome: ");
-                        fgets(nome, MAX_N, stdin);
-                        fflush(stdin);
-                		formatar_nome(nome);
-                        strcpy(d[pos].nome, nome);
-                        break;
-                    case 2:
-                        printf("Insira o novo código: ");
-                        scanf("%d", &d[pos].codigo);
-                        fflush(stdin);
-                        break;
-                    case 3:
-                        printf("Insira o novo semestre: ");
-                        scanf("%d", &d[pos].semestre);
-                        fflush(stdin);
-                        break;
-                    case 4:
-                        printf("Insira a nova quantidade de vagas: ");
-                        scanf("%d", &d[pos].vagas);
-                        fflush(stdin);
-                        break;
-                    case 5:
-                        do {
-                            printf("Insira a matrícula do novo professor: ");
-                            scanf("%d", &mat_prof);
-                            fflush(stdin);
-                            pos_prof = buscar_pessoa(prof, qtd_p, mat_prof);
-                            if (pos_prof < 0)
-                                printf("Não foi possível achar o professor!\n");
-                            else
-                                d[pos].professor = prof[pos_prof];
-                        } while (pos_prof < 0);
-                        break;
-                    default:
-                        printf("Opção inválida!\n");
-                }
+            	do {
+            		printf("Selecione o dado a ser alterado:\n");
+            		printf("1 - Nome\n");
+            		printf("2 - Código\n");
+            		printf("3 - Semestre\n");
+            		printf("4 - Vagas\n");
+            		printf("5 - Professor\n");
+            		scanf("%d", &opcao);
+            		fflush(stdin);
+            		switch (opcao) {
+            			case 1:
+            				printf("Insira o novo nome: ");
+            				fgets(nome, MAX_N, stdin);
+            				fflush(stdin);
+            				formatar_nome(nome);
+            				strcpy(d[pos].nome, nome);
+            				break;
+            			case 2:
+            				printf("Insira o novo código: ");
+            				scanf("%d", &d[pos].codigo);
+            				fflush(stdin);
+            				break;
+            			case 3:
+            				printf("Insira o novo semestre: ");
+            				scanf("%d", &d[pos].semestre);
+            				fflush(stdin);
+            				break;
+            			case 4:
+            				printf("Insira a nova quantidade de vagas: ");
+            				scanf("%d", &d[pos].vagas);
+            				fflush(stdin);
+            				break;
+            			case 5:
+            				do {
+            					printf("Insira a matrícula do novo professor: ");
+            					scanf("%d", &mat_prof);
+            					fflush(stdin);
+            					pos_prof = buscar_pessoa(prof, qtd_p, mat_prof);
+            					if (pos_prof < 0)
+            						printf("Não foi possível achar o professor!\n");
+            					else
+            						d[pos].professor = prof[pos_prof];
+            				} while (pos_prof < 0);
+            				break;
+            			default:
+            				printf("Opção inválida!\n");
+            		}
+            	}while (opcao < 1 ||opcao > 5);
             }
-        } while (pos < 0 && (opcao < 1 || opcao > 5));
+        } while (pos < 0);
         printf("\nDados alterados com sucesso!\n");
 	}
 }
