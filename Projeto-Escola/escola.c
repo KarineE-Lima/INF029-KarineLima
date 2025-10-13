@@ -47,7 +47,7 @@ int buscar_pessoa(pessoa a[TAM], int qtd, int mat_busc);
 int buscar_disciplina(disciplina d[TAM], int qtd, int codigo);
 void unir_vetor(pessoa a[TAM], pessoa b[TAM], pessoa *U, int qtd_a, int qtd_b);
 void atualizar_pessoa(pessoa a[TAM], int qtd);
-void excluir_pessoa(pessoa a[TAM], int *qtd);
+void excluir_pessoa(pessoa *a, int *qtd_a, disciplina *d, int qtd_d);
 void cadastrar_disciplina(disciplina *d, int *qtd, pessoa prof[TAM], int qtd_p);
 void listar_disciplina(disciplina d[TAM], int qtd);
 void atualizar_disciplina(disciplina d[TAM], int qtd, pessoa prof[TAM], int qtd_p);
@@ -97,7 +97,7 @@ int main(){
 							break;
 						case 4:
 							printf("Excluir Aluno\n");
-							excluir_pessoa(aluno, &qtd_aluno);
+							excluir_pessoa(aluno, &qtd_aluno, disc, qtd_disciplina);
 							break;
 						default: printf("Opção inválida!\n");
 					}
@@ -126,7 +126,7 @@ int main(){
 							break;
 						case 4:
 							printf("Excluir Professor\n");
-							excluir_pessoa(prof, &qtd_prof);
+							excluir_pessoa(prof, &qtd_prof, disc, qtd_disciplina);
 							break;
 						default: printf("Opção inválida!\n");
 					}
@@ -862,25 +862,40 @@ void atualizar_disciplina(disciplina d[TAM], int qtd, pessoa prof[TAM], int qtd_
 }
 
 // exclui professor/aluno a partir da matrícula
-void excluir_pessoa(pessoa *a, int *qtd) {
-	int pos, matricula;
-	if (tam_lista(*qtd) == LISTA_VAZIA) {
+void excluir_pessoa(pessoa *a, int *qtd_a, disciplina *d, int qtd_d) {
+	int pos, pos_a, matricula;
+	if (tam_lista(*qtd_a) == LISTA_VAZIA) {
 		printf("Lista Vazia!\n");
 	} else {
 		do {
 			printf("Insira a matrícula: ");
 			scanf("%d", &matricula);
-			pos = buscar_pessoa(a, *qtd, matricula);
+			pos = buscar_pessoa(a, *qtd_a, matricula);
 			if (pos < 0) {
 				printf("Matrícula não encontrada.\n");
 			} else {
-				for (int i = pos; i < *qtd - 1; i++) {
+				for (int i = pos; i < *qtd_a - 1; i++) {
 					a[i] = a[i + 1];
+				}
+				for(int j = 0; j < qtd_d; j++){
+					// se for professor
+					if(d[j].professor.matricula == matricula){
+						strcpy(d[j].professor.nome, "Professor Excluído");
+					}
+					// se for aluno
+					pos_a = buscar_pessoa(d[j].alunos, d[j].qtd_alunos, matricula);
+					if(pos_a >= 0){
+						for(int k = pos; k < d[j].qtd_alunos - 1; k++){
+							d[j].alunos[k] = d[j].alunos[k + 1];
+						}
+						d[j].qtd_alunos--;
+						d[j].vagas++;
+					}
 				}
 				printf("\nMatrícula Excluída com sucesso!\n");
 			}
 		} while (pos < 0);
-		*qtd = *qtd - 1;
+		*qtd_a = *qtd_a - 1;
 	}
 }
 
@@ -897,26 +912,30 @@ void incluir_aluno(disciplina *d, pessoa *a, int qtd_d, int qtd_a) {
 			if (pos_d < 0) {
 				printf("Não foi possível encontrar a disciplina.\n");
 			} else {
-				do {
-					printf("Insira a matrícula do aluno a ser incluido: ");
-					scanf("%d", &matricula);
-					fflush(stdin);
-					pos_a = buscar_pessoa(a, qtd_a, matricula);
-					if (pos_a < 0) {
-						printf("Aluno não encontrado.\n");
-					} else {
-						pos = buscar_pessoa(d[pos_d].alunos, d[pos_d].qtd_alunos, matricula);
-						if (pos >= 0) {
-							printf("Aluno já incluído.\n");
+				if (d[pos_d].vagas == 0) {
+					printf("Sem vagas para essa disciplina.\n");
+				} else {
+					do {
+						printf("Insira a matrícula do aluno a ser incluido: ");
+						scanf("%d", &matricula);
+						fflush(stdin);
+						pos_a = buscar_pessoa(a, qtd_a, matricula);
+						if (pos_a < 0) {
+							printf("Aluno não encontrado.\n");
 						} else {
-							d[pos_d].alunos[d[pos_d].qtd_alunos] = a[pos_a];
-							a[pos_a].qtd_displinas++;
-							d[pos_d].vagas--;
-							d[pos_d].qtd_alunos++;
-							printf("Aluno Inserido com sucesso!\n");
+							pos = buscar_pessoa(d[pos_d].alunos, d[pos_d].qtd_alunos, matricula);
+							if (pos >= 0) {
+								printf("Aluno já incluído.\n");
+							} else {
+								d[pos_d].alunos[d[pos_d].qtd_alunos] = a[pos_a];
+								a[pos_a].qtd_displinas++;
+								d[pos_d].vagas--;
+								d[pos_d].qtd_alunos++;
+								printf("Aluno Inserido com sucesso!\n");
+							}
 						}
-					}
-				} while (pos_a < 0);
+					} while (pos_a < 0);
+				}
 			}
 		} while (pos_d < 0);
 	}
