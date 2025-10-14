@@ -191,6 +191,8 @@ int main(){
 	} while (opcao != 0);
 	return 0;
 }
+// ----------- FUNÇÕES AUXLIARES ----------------
+
 // Transforma as letras da string em minusculo
 void minusculo(char *c, int tam){
 	for(int i = 0; i < tam; i++){
@@ -466,17 +468,31 @@ void cadastrar_disciplina(disciplina *d, int *qtd, pessoa prof[TAM], int qtd_p) 
 		fgets(d->nome, MAX_N, stdin);
 		fflush(stdin);
 		formatar_nome(d->nome);
-		printf("Insira o codigo da disciplina: ");
-		scanf("%d", &(d->codigo));
-		fflush(stdin);
 
-		printf("Insira o semestre: ");
-		scanf("%d", &(d->semestre));
-		fflush(stdin);
+		do {
+			printf("Insira o codigo da disciplina: ");
+			scanf("%d", &(d->codigo));
+			fflush(stdin);
+			if (d->codigo < 0)
+				printf("Insira um código válido!\n");
+		} while (d->codigo <= 0);
 
-		printf("Insira a quantidade de vagas: ");
-		scanf("%d", &(d->vagas));
-		fflush(stdin);
+		do {
+			printf("Insira o semestre: ");
+			scanf("%d", &(d->semestre));
+			fflush(stdin);
+			if (d->semestre <= 0)
+				printf("Insira um semestre válido");
+		}while (d->semestre <= 0);
+
+		do {
+			printf("Insira a quantidade de vagas: ");
+			scanf("%d", &(d->vagas));
+			fflush(stdin);
+			if (d-> vagas < 0)
+				printf("Insira uma quantidade de vagas válida!\n");
+		} while (d -> vagas < 0);
+
 		do {
 			printf("Insira a matrícula do professor: ");
 			scanf("%d", &mat_prof);
@@ -487,6 +503,7 @@ void cadastrar_disciplina(disciplina *d, int *qtd, pessoa prof[TAM], int qtd_p) 
 			else
 				d->professor = prof[pos];
 		} while (pos < 0);
+
 		d -> qtd_alunos = 0;
 		*qtd = *qtd + 1;
 		printf("Disciplina cadastrada com sucesso!\n");
@@ -825,19 +842,31 @@ void atualizar_disciplina(disciplina d[TAM], int qtd, pessoa prof[TAM], int qtd_
             				strcpy(d[pos].nome, nome);
             				break;
             			case 2:
-            				printf("Insira o novo código: ");
-            				scanf("%d", &d[pos].codigo);
-            				fflush(stdin);
+            				do {
+            					printf("Insira o novo código: ");
+            					scanf("%d", &d[pos].codigo);
+            					fflush(stdin);
+            					if (d[pos].codigo <= 0)
+            						printf("Insira um código válido!\n");
+            				}while (d[pos].codigo <= 0);
             				break;
             			case 3:
-            				printf("Insira o novo semestre: ");
-            				scanf("%d", &d[pos].semestre);
-            				fflush(stdin);
+            				do{
+            					printf("Insira o novo semestre: ");
+            					scanf("%d", &d[pos].semestre);
+            					fflush(stdin);
+            					if (d[pos].semestre <= 0)
+            						printf("Insira um semestre válido!\n");
+            				}while (d[pos].semestre <= 0);
             				break;
             			case 4:
-            				printf("Insira a nova quantidade de vagas: ");
-            				scanf("%d", &d[pos].vagas);
-            				fflush(stdin);
+            				do {
+            					printf("Insira a nova quantidade de vagas: ");
+            					scanf("%d", &d[pos].vagas);
+            					fflush(stdin);
+            					if (d[pos].vagas < 0)
+            						printf("Insira uma quantidade de vagas válida!\n");
+            				}while (d[pos].vagas < 0);
             				break;
             			case 5:
             				do {
