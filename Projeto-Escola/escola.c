@@ -28,7 +28,7 @@ typedef struct disciplina{
 	int semestre;
 	int vagas;
 	pessoa professor;
-	pessoa alunos[TAM];
+	pessoa *alunos;
 	int qtd_alunos;
 } disciplina;
 
@@ -45,7 +45,7 @@ void cadastrar_pessoa(pessoa *a, pessoa lista[TAM],int *qtd, int qtd2);
 void listar_pessoa(pessoa a[TAM], int qtd, char c[MAX_N]);
 void listar_aniversariantes(pessoa lista[TAM], int qtd);
 void buscar_por_nome(pessoa lista[TAM], int qtd);
-int buscar_pessoa(pessoa a[TAM], int qtd, int mat_busc);
+int buscar_pessoa(pessoa *a, int qtd, int mat_busc);
 int buscar_disciplina(disciplina d[TAM], int qtd, int codigo);
 void unir_vetor(pessoa a[TAM], pessoa b[TAM], pessoa *U, int qtd_a, int qtd_b);
 void atualizar_pessoa(pessoa a[TAM], int qtd);
@@ -62,6 +62,7 @@ char validar_genero();
 int validar_data(data d);
 int validar_cpf(char cpf[CPF]);
 
+// ------- FUNÇÃO PRINCIPAL ---------
 int main(){
 	int opcao, op_aluno, op_prof, op_disciplina, op_relat;
 	int qtd_aluno = 0, qtd_prof = 0, qtd_disciplina = 0;
@@ -198,6 +199,7 @@ int main(){
 	} while (opcao != 0);
 	return 0;
 }
+
 // ----------- FUNÇÕES AUXLIARES ----------------
 
 // Transforma as letras da string em minusculo
@@ -231,7 +233,7 @@ void copia_vetor(pessoa *a, pessoa *b, int qtd) {
 }
 
 // retorna a posição da pessoa no vetor, se não achar, retorna -1:
-int buscar_pessoa(pessoa a[TAM], int qtd, int mat_busc){
+int buscar_pessoa(pessoa *a, int qtd, int mat_busc){
 	for (int i = 0; i < qtd; i++) {
 		if (mat_busc == a[i].matricula) {
 			return i;
@@ -841,8 +843,8 @@ void cadastrar_disciplina(disciplina *d, int *qtd, pessoa prof[TAM], int qtd_p) 
 			else
 				d->professor = prof[pos];
 		} while (pos < 0);
-
 		d -> qtd_alunos = 0;
+		d->alunos = malloc(d->vagas * sizeof(pessoa));
 		*qtd = *qtd + 1;
 		printf("Disciplina cadastrada com sucesso!\n");
 	}
@@ -904,6 +906,7 @@ void listar_disciplina(disciplina d[TAM], int qtd) {
 		}while (op_lista < 1 || op_lista > 3);
 	}
 }
+
 // atualiza disciplina a partir do codigo
 void atualizar_disciplina(disciplina d[TAM], int qtd, pessoa prof[TAM], int qtd_p) {
     int pos, opcao, codigo, mat_prof, pos_prof;
@@ -954,7 +957,10 @@ void atualizar_disciplina(disciplina d[TAM], int qtd, pessoa prof[TAM], int qtd_
             					fflush(stdin);
             					if (d[pos].vagas < 0)
             						printf("Insira uma quantidade de vagas válida!\n");
+            					else
+            						realloc(d[pos].alunos, d[pos].vagas * sizeof(pessoa));
             				}while (d[pos].vagas < 0);
+            				d[pos].vagas -= d[pos].qtd_alunos;
             				break;
             			case 4:
             				do {
@@ -978,6 +984,7 @@ void atualizar_disciplina(disciplina d[TAM], int qtd, pessoa prof[TAM], int qtd_
 	}
 }
 
+// Inclui aluno na disciplina
 void incluir_aluno(disciplina *d, pessoa *a, int qtd_d, int qtd_a) {
 	int pos_d, pos_a, pos, codigo, matricula;
 	if (tam_lista(qtd_d) == LISTA_VAZIA || tam_lista(qtd_a) == LISTA_VAZIA) {
@@ -1019,6 +1026,8 @@ void incluir_aluno(disciplina *d, pessoa *a, int qtd_d, int qtd_a) {
 		} while (pos_d < 0);
 	}
 }
+
+// Exclui aluno da disciplina
 void excluir_aluno(disciplina *d, int qtd_d, pessoa *a, int qtd_a) {
 	int pos_d, pos_a, codigo, matricula;
 	if (!tam_lista(qtd_d)) {
@@ -1077,6 +1086,7 @@ void listar_aniversariantes(pessoa lista[TAM], int qtd) {
 			printf("Nenhum aniversariante encontrado neste mês.\n");
 	}
 }
+
 void buscar_por_nome(pessoa lista[TAM], int qtd) {
 	if (qtd == 0) {
 		printf("Lista vazia!\n");
