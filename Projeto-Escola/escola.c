@@ -43,6 +43,7 @@ int menu_relatorio();
 void cadastrar_pessoa(pessoa *a, pessoa lista[TAM],int *qtd);
 void listar_pessoa(pessoa a[TAM], int qtd, char c[MAX_N]);
 void listar_aniversariantes(pessoa lista[TAM], int qtd);
+void buscar_por_nome(pessoa lista[TAM], int qtd);
 int buscar_pessoa(pessoa a[TAM], int qtd, int mat_busc);
 int buscar_disciplina(disciplina d[TAM], int qtd, int codigo);
 void unir_vetor(pessoa a[TAM], pessoa b[TAM], pessoa *U, int qtd_a, int qtd_b);
@@ -180,7 +181,10 @@ int main(){
 							printf("Aniversariantes do Mês\n");
 							listar_aniversariantes(geral, qtd_aluno+qtd_prof);
 							break;
-						case 2: printf("Buscar pessoas\n"); break;
+						case 2:
+							printf("Buscar pessoas\n");
+							buscar_por_nome(geral, qtd_aluno+qtd_prof);
+							break;
 						default: printf("Opção Inválida!\n");
 					}
 				} while (op_relat != 0);
@@ -672,6 +676,31 @@ void filtrar_sexo(pessoa a[TAM], int qtd, char c[MAX_N]){
 		}
 	} while(busc_sex != 'F' && busc_sex != 'M' && busc_sex != 'O');
 }
+//lista aluno matriculado em menos de 3 disciplinas
+void listar_alunos_menos_de_3_disciplinas(pessoa alunos[TAM], int qtd) {
+	int encontrou = 0;
+
+	if (qtd == 0) {
+		printf("Nenhum aluno cadastrado.\n");
+		return;
+	}
+
+	printf("Alunos matriculados em menos de 3 disciplinas:\n\n");
+
+	for (int i = 0; i < qtd; i++) {
+		if (alunos[i].qtd_displinas < 3) {
+			printf("Nome: %s", alunos[i].nome);
+			printf("Matrícula: %d\n", alunos[i].matricula);
+			printf("Quantidade de Disciplinas: %d\n", alunos[i].qtd_displinas);
+			printf("-----------------------------\n");
+			encontrou = 1;
+		}
+	}
+
+	if (!encontrou) {
+		printf("Nenhum aluno está matriculado em menos de 3 disciplinas.\n");
+	}
+}
 // modulo de listar
 void listar_pessoa(pessoa a[TAM], int qtd, char c[MAX_N]) {
 	int op_lista;
@@ -703,6 +732,7 @@ void listar_pessoa(pessoa a[TAM], int qtd, char c[MAX_N]) {
 				case 5:
 					if (!strcmp(c, "Alunos")) {
 						printf("%s matriculados em menos de 3 disciplinas\n", c);
+						listar_alunos_menos_de_3_disciplinas(a, qtd);
 					} else {
 						printf("Opção inválida!\n");
 					}
@@ -1039,5 +1069,59 @@ void listar_aniversariantes(pessoa lista[TAM], int qtd) {
 		}
 		if (!achou)
 			printf("Nenhum aniversariante encontrado neste mês.\n");
+	}
+}
+void buscar_por_nome(pessoa lista[TAM], int qtd) {
+	if (qtd == 0) {
+		printf("Lista vazia!\n");
+		return;
+	}
+
+	char busca[MAX_N];
+	int tamanho;
+
+	do {
+		printf("Digite pelo menos 3 letras do nome para buscar: ");
+		fgets(busca, MAX_N, stdin);
+
+		//while (getchar() != '\n');
+		tamanho = strlen(busca);
+		if (busca[tamanho - 1] == '\n') {
+			busca[tamanho - 1] = '\0';
+			tamanho--;
+		}
+
+		if (tamanho < 3) {
+			printf("Digite pelo menos 3 letras.\n");
+		}
+	} while (tamanho < 3);
+
+	int achou = 0;
+	char nome_lower[MAX_N];
+	char busca_lower[MAX_N];
+
+	// converte a busca para minúsculo
+	strcpy(busca_lower, busca);
+	for (int i = 0; busca_lower[i]; i++) busca_lower[i] = tolower(busca_lower[i]);
+
+	printf("\nResultados da busca:\n");
+	for (int i = 0; i < qtd; i++) {
+		strcpy(nome_lower, lista[i].nome);
+		for (int j = 0; nome_lower[j]; j++) nome_lower[j] = tolower(nome_lower[j]);
+
+		if (strstr(nome_lower, busca_lower) != NULL) {
+			printf("- %s (Matrícula: %d, Sexo: %c, Data de Nascimento: %02d/%02d/%04d)\n",
+				   lista[i].nome,
+				   lista[i].matricula,
+				   lista[i].sexo,
+				   lista[i].data_nascimento.dia,
+				   lista[i].data_nascimento.mes,
+				   lista[i].data_nascimento.ano);
+			achou = 1;
+		}
+	}
+
+	if (!achou) {
+		printf("Nenhum resultado encontrado para \"%s\".\n", busca);
 	}
 }
