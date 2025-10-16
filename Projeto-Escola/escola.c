@@ -53,6 +53,7 @@ void excluir_pessoa(pessoa *a, int *qtd_a, disciplina *d, int qtd_d);
 void cadastrar_disciplina(disciplina *d, int *qtd, pessoa prof[TAM], int qtd_p);
 void listar_disciplina(disciplina d[TAM], int qtd);
 void atualizar_disciplina(disciplina d[TAM], int qtd, pessoa prof[TAM], int qtd_p);
+void excluir_disciplina(disciplina *d, int *qtd_d, pessoa *a, int qtd_a);
 void incluir_aluno(disciplina *d, pessoa *a, int qtd_d, int qtd_a);
 void excluir_aluno(disciplina *d, int qtd_d, pessoa *a, int qtd_a);
 
@@ -76,6 +77,12 @@ int main(){
 		switch (opcao) {
 			case 0:
 				printf("Saindo...\n");
+				for (int i = 0; i < qtd_disciplina; i++) {
+					if (disc[i].alunos != NULL) {
+						free(disc[i].alunos);
+						disc[i].alunos = NULL;
+					}
+				}
 				break;
 			case 1:
 				do {
@@ -159,6 +166,7 @@ int main(){
 							break;
 						case 4:
 							printf("Excluir Disciplina\n");
+							excluir_disciplina(disc, &qtd_disciplina, aluno, qtd_aluno);
 							break;
 						case 5:
 							printf("Incluir aluno\n");
@@ -362,14 +370,14 @@ int menu_listar(char c[MAX_N]) {
 // ---------- FUNÇÕES DE VALIDAÇÃO ----------
 
 // Matrícula única
-int validar_matricula(int matricula, pessoa lista[TAM], int qtd) {
+/*int validar_matricula(int matricula, pessoa lista[TAM], int qtd) {
 	for (int i = 0; i < qtd; i++) {
 		if (lista[i].matricula == matricula) {
 			return 0;
 		}
 	}
 	return 1;
-}
+}*/
 
 // Formatar nome
 void formatar_nome(char nome[MAX_N]) {
@@ -704,7 +712,7 @@ void listar_pessoa(pessoa a[TAM], int qtd, char c[MAX_N]) {
 
 // atualiza professor/aluno a partir da matricula
 void atualizar_pessoa(pessoa a[TAM], int qtd) {
-	int pos, opcao, matricula, res;
+	int pos, opcao, matricula;
 	char nome[MAX_N];
 	if (tam_lista(qtd) == LISTA_VAZIA) {
 		printf("Lista Vazia!\n");
@@ -717,7 +725,6 @@ void atualizar_pessoa(pessoa a[TAM], int qtd) {
 				printf("Matrícula não encontrada.\n");
 			} else {
 				printf("Selecione o dado a ser alterado:\n");
-				//printf("1 - Matrícula\n");
 				printf("1 - Nome\n");
 				printf("2 - Sexo\n");
 				printf("3 - Data de Nascimento\n");
@@ -788,7 +795,7 @@ void excluir_pessoa(pessoa *a, int *qtd_a, disciplina *d, int qtd_d) {
 					// se for aluno
 					pos_a = buscar_pessoa(d[j].alunos, d[j].qtd_alunos, matricula);
 					if(pos_a >= 0){
-						for(int k = pos; k < d[j].qtd_alunos - 1; k++){
+						for(int k = pos_a; k < d[j].qtd_alunos - 1; k++){
 							d[j].alunos[k] = d[j].alunos[k + 1];
 						}
 						d[j].qtd_alunos--;
@@ -806,47 +813,51 @@ void excluir_pessoa(pessoa *a, int *qtd_a, disciplina *d, int qtd_d) {
 //cadastra disciplina
 void cadastrar_disciplina(disciplina *d, int *qtd, pessoa prof[TAM], int qtd_p) {
 	int mat_prof, pos;
-	if (tam_lista(*qtd) == LISTA_CHEIA) {
-		printf("Lista de disciplinas cheia!\n");
+	if (qtd_p == 0) {
+		printf("Lista de Professores Vazia.\n");
 	} else {
-		d->codigo = gerar_codigo(d, *qtd);
-		printf("Código: %d\n", d->codigo);
+		if (tam_lista(*qtd) == LISTA_CHEIA) {
+			printf("Lista de disciplinas cheia!\n");
+		} else {
+			d->codigo = gerar_codigo(d, *qtd);
+			printf("Código: %d\n", d->codigo);
 
-		printf("Insira o nome da disciplina: ");
-		fgets(d->nome, MAX_N, stdin);
-		fflush(stdin);
-		formatar_nome(d->nome);
-
-		do {
-			printf("Insira o semestre: ");
-			scanf("%d", &(d->semestre));
+			printf("Insira o nome da disciplina: ");
+			fgets(d->nome, MAX_N, stdin);
 			fflush(stdin);
-			if (d->semestre <= 0)
-				printf("Insira um semestre válido");
-		}while (d->semestre <= 0);
+			formatar_nome(d->nome);
 
-		do {
-			printf("Insira a quantidade de vagas: ");
-			scanf("%d", &(d->vagas));
-			fflush(stdin);
-			if (d-> vagas < 0)
-				printf("Insira uma quantidade de vagas válida!\n");
-		} while (d -> vagas < 0);
+			do {
+				printf("Insira o semestre: ");
+				scanf("%d", &(d->semestre));
+				fflush(stdin);
+				if (d->semestre <= 0)
+					printf("Insira um semestre válido");
+			}while (d->semestre <= 0);
 
-		do {
-			printf("Insira a matrícula do professor: ");
-			scanf("%d", &mat_prof);
-			fflush(stdin);
-			pos = buscar_pessoa(prof, qtd_p, mat_prof);
-			if (pos < 0)
-				printf("Não foi possível achar o professor!");
-			else
-				d->professor = prof[pos];
-		} while (pos < 0);
-		d -> qtd_alunos = 0;
-		d->alunos = malloc(d->vagas * sizeof(pessoa));
-		*qtd = *qtd + 1;
-		printf("Disciplina cadastrada com sucesso!\n");
+			do {
+				printf("Insira a quantidade de vagas: ");
+				scanf("%d", &(d->vagas));
+				fflush(stdin);
+				if (d-> vagas < 0)
+					printf("Insira uma quantidade de vagas válida!\n");
+			} while (d -> vagas < 0);
+
+			do {
+				printf("Insira a matrícula do professor: ");
+				scanf("%d", &mat_prof);
+				fflush(stdin);
+				pos = buscar_pessoa(prof, qtd_p, mat_prof);
+				if (pos < 0)
+					printf("Não foi possível achar o professor!");
+				else
+					d->professor = prof[pos];
+			} while (pos < 0);
+			d -> qtd_alunos = 0;
+			d->alunos = malloc(d->vagas * sizeof(pessoa));
+			*qtd = *qtd + 1;
+			printf("Disciplina cadastrada com sucesso!\n");
+		}
 	}
 }
 
@@ -963,16 +974,20 @@ void atualizar_disciplina(disciplina d[TAM], int qtd, pessoa prof[TAM], int qtd_
             				d[pos].vagas -= d[pos].qtd_alunos;
             				break;
             			case 4:
-            				do {
-            					printf("Insira a matrícula do novo professor: ");
-            					scanf("%d", &mat_prof);
-            					fflush(stdin);
-            					pos_prof = buscar_pessoa(prof, qtd_p, mat_prof);
-            					if (pos_prof < 0)
-            						printf("Não foi possível achar o professor!\n");
-            					else
-            						d[pos].professor = prof[pos_prof];
-            				} while (pos_prof < 0);
+            				if (qtd_p == 0) {
+            					printf("Lista de professores vazia.\n");
+            				} else {
+            					do {
+            						printf("Insira a matrícula do novo professor: ");
+            						scanf("%d", &mat_prof);
+            						fflush(stdin);
+            						pos_prof = buscar_pessoa(prof, qtd_p, mat_prof);
+            						if (pos_prof < 0)
+            							printf("Não foi possível achar o professor!\n");
+            						else
+            							d[pos].professor = prof[pos_prof];
+            					} while (pos_prof < 0);
+            				}
             				break;
             			default:
             				printf("Opção inválida!\n");
@@ -981,6 +996,52 @@ void atualizar_disciplina(disciplina d[TAM], int qtd, pessoa prof[TAM], int qtd_
             }
         } while (pos < 0);
         printf("\nDados alterados com sucesso!\n");
+	}
+}
+
+// Exclui a disciplina
+void excluir_disciplina(disciplina *d, int *qtd_d, pessoa *a, int qtd_a) {
+	int pos, pos_a, codigo;
+	char resp;
+	if (!tam_lista(*qtd_d)) {
+		printf("Lista Vazia!\n");
+	} else {
+		do {
+			printf("Informe o código da disciplina: ");
+			scanf("%d", &codigo);
+			fflush(stdin);
+			pos = buscar_disciplina(d, *qtd_d, codigo);
+			if (pos < 0) {
+				printf("Não foi possível encontrar a disciplina.\n");
+			} else {
+				printf("Disciplina encontrada: [%d] %s\n", d[pos].codigo, d[pos].nome);
+				printf("Semestre: %d | Vagas: %d | Matriculados: %d\n", d[pos].semestre, d[pos].vagas, d[pos].qtd_alunos);
+				printf("Deseja realmente excluir esta disciplina? (S/N): ");
+				scanf("%c", &resp);
+				fflush(stdin);
+				if (resp == 'S' || resp == 's') {
+					for (int i = 0; i < d[pos].qtd_alunos; i++) {
+						int mat = d[pos].alunos[i].matricula;
+						pos_a = buscar_pessoa(a, qtd_a, mat);
+						if (pos_a >= 0) {
+							if (a[pos_a].qtd_displinas > 0)
+								a[pos_a].qtd_displinas--;
+						}
+					}
+					if (d[pos].alunos != NULL) {
+						free(d[pos].alunos);
+						d[pos].alunos = NULL;
+					}
+					for (int j = pos; j < *qtd_d - 1; j++) {
+						d[j] = d[j + 1];
+					}
+					*qtd_d = *qtd_d - 1;
+					printf("Disciplina excluída com sucesso!\n");
+				} else {
+					printf("Operação cancelada.\n");
+				}
+			}
+		} while (pos < 0);
 	}
 }
 
@@ -1002,6 +1063,7 @@ void incluir_aluno(disciplina *d, pessoa *a, int qtd_d, int qtd_a) {
 					printf("Sem vagas para essa disciplina.\n");
 				} else {
 					do {
+						printf("Disciplina: [%d] %s\n", d[pos_d].codigo, d[pos_d].nome);
 						printf("Insira a matrícula do aluno a ser incluido: ");
 						scanf("%d", &matricula);
 						fflush(stdin);
@@ -1043,6 +1105,7 @@ void excluir_aluno(disciplina *d, int qtd_d, pessoa *a, int qtd_a) {
 				printf("Não há alunos matriculados nessa disciplina.\n");
 			}else {
 				do {
+					printf("Disciplina: [%d] %s\n", d[pos_d].codigo, d[pos_d].nome);
 					printf("Informe a matricula do aluno a ser excluído: ");
 					scanf("%d", &matricula);
 					pos_a = buscar_pessoa(d[pos_d].alunos, d[pos_d].qtd_alunos, matricula);
@@ -1055,6 +1118,7 @@ void excluir_aluno(disciplina *d, int qtd_d, pessoa *a, int qtd_a) {
 						d[pos_d].vagas++;
 						pos_a = buscar_pessoa(a, qtd_a, matricula);
 						a[pos_a].qtd_displinas--;
+						printf("Aluno %s excluído da disciplina com sucesso!\n", a[pos_a].nome);
 					}
 				} while (pos_a < 0);
 			}
@@ -1099,8 +1163,7 @@ void buscar_por_nome(pessoa lista[TAM], int qtd) {
 	do {
 		printf("Digite pelo menos 3 letras do nome para buscar: ");
 		fgets(busca, MAX_N, stdin);
-
-		//while (getchar() != '\n');
+		fflush(stdin);
 		tamanho = strlen(busca);
 		if (busca[tamanho - 1] == '\n') {
 			busca[tamanho - 1] = '\0';
