@@ -1,3 +1,6 @@
+// Projeto Escola criado para a disciplina Laboratório de Programação sob tutoria do professor Renato Novaes
+// Alunos: Karine Lima, Marcelo Anunciação e Ranna Carvalho
+
 #include <stdio.h>
 #include "escola.h"
 

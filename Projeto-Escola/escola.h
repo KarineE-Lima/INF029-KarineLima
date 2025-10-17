@@ -398,6 +398,8 @@ void cadastrar_pessoa(pessoa *a, pessoa *lista, int *qtd, int qtd2){
 	}
 }
 //todas a funções de listar pessoa
+
+//imprime pessoa a partir do inicio e fim
 void imprimir_pessoa(pessoa a[TAM], int qtd, int ini) {
 	for (int i = ini; i < qtd; i++) {
 		gerar_linha();
@@ -750,7 +752,7 @@ void obter_displina(disciplina d[TAM], int qtd) {
 			} else {
 				printf("Alunos:\n");
 				for (int i = 0; i < d[pos].qtd_alunos; i++)
-					printf("Nome: %s\n", d[pos].alunos[i].nome);
+					printf("- [%d] %s", d[pos].alunos[i].matricula, d[pos].alunos[i].nome);
 			}
 		}
 	}while (pos < 0);
@@ -761,7 +763,6 @@ void listar_disciplinas_extrapolam_40_vagas(disciplina d[TAM], int qtd) {
 	if (tam_lista(qtd) == LISTA_VAZIA) {
 		printf("Lista Vazia!\n");
 	} else {
-		printf("Disciplinas com mais de 40 vagas\n\n");
 		for (int i = 0; i < qtd; i++) {
 			if (d[i].vagas > 40) {
 				imprimir_disciplina(d, i, i+1);
