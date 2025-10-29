@@ -10,21 +10,23 @@
 //  O aluno deve preencher seus dados abaixo, e implementar as questões do trabalho
 
 //  ----- Dados do Aluno -----
-//  Nome:
-//  email:
-//  Matrícula:
-//  Semestre:
+//  Nome: Karine Evelin Sousa da Cruz Lima
+//  email: karine.elima73@gmail.com
+//  Matrícula: 20251160002
+//  Semestre: 2025.2
 
 //  Copyright © 2016 Renato Novais. All rights reserved.
 // Última atualização: 07/05/2021 - 19/08/2016 - 17/10/2025
 
 // #################################################
 
-#include <stdio.h>
-#include "trabalho1.h" 
+#include "trabalho1.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 DataQuebrada quebraData(char data[]);
+int bissexto(int ano);
+void tratarString(char *texto);
 
 /*
 ## função utilizada para testes  ##
@@ -91,17 +93,27 @@ int teste(int a)
  */
 int q1(char data[])
 {
-  int datavalida = 1;
+    int datavalida = 1;
+    DataQuebrada data_div = quebraData(data);
 
-  //quebrar a string data em strings sDia, sMes, sAno
+    if (!data_div.valido) datavalida = 0;
 
+    int dias_mes[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-  //printf("%s\n", data);
+    if(bissexto(data_div.iAno))
+        dias_mes[1]++;
 
-  if (datavalida)
-      return 1;
-  else
-      return 0;
+    if(data_div.iAno < 100)
+        data_div.iAno += (data_div.iAno > 25)? 1900 : 2000;
+
+    if(data_div.iAno < 1900 || data_div.iAno > 2025)
+        datavalida = 0;
+    if(data_div.iMes < 1 || data_div.iMes > 12)
+        datavalida = 0;
+    if(data_div.iDia < 1 || data_div.iDia > dias_mes[data_div.iMes - 1])
+        datavalida = 0;
+
+    return datavalida;
 }
 
 
@@ -125,6 +137,11 @@ DiasMesesAnos q2(char datainicial[], char datafinal[])
 
     //calcule os dados e armazene nas três variáveis a seguir
     DiasMesesAnos dma;
+    int dias_mes[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    int dias_t = 0;
+    DataQuebrada dataI = quebraData(datainicial);
+    DataQuebrada dataF = quebraData(datafinal);
+
 
     if (q1(datainicial) == 0){
       dma.retorno = 2;
@@ -133,9 +150,53 @@ DiasMesesAnos q2(char datainicial[], char datafinal[])
       dma.retorno = 3;
       return dma;
     }else{
-      //verifique se a data final não é menor que a data inicial
-      
-      //calcule a distancia entre as datas
+        if (dataI.iAno > dataF.iAno) {
+            dma.retorno = 4;
+            return dma;
+        }
+        if (dataI.iAno == dataF.iAno && dataI.iMes > dataF.iMes) {
+            dma.retorno = 4;
+            return dma;
+        }
+        if (dataI.iAno == dataF.iAno && dataI.iMes == dataF.iMes && dataI.iDia > dataF.iDia) {
+            dma.retorno = 4;
+            return dma;
+        }
+
+        //calcule a distancia entre as datas
+
+        dma.qtdAnos = dataF.iAno - dataI.iAno;
+        if (dataI.iMes > dataF.iMes || (dataI.iMes == dataF.iMes && dataI.iDia > dataF.iDia))
+            dma.qtdAnos--;
+        dataI.iAno += dma.qtdAnos;
+
+        dma.qtdMeses = 0;
+
+
+        int m_i = (dataI.iMes >= dataF.iMes && dataI.iDia != dataF.iDia) ? dataI.iMes - 12 : dataI.iMes;
+        int m_f = dataF.iMes;
+
+        while (m_i < m_f) {
+            dma.qtdMeses++;
+            m_i++;
+        }
+        if (dataI.iDia > dataF.iDia) {
+            dma.qtdMeses--;
+        }
+        if(dma.qtdMeses >= 12) {
+            dma.qtdMeses -= 12;
+            dma.qtdAnos++;
+        }
+        dataI.iMes += dma.qtdMeses;
+
+        if (dataI.iMes > 12) {
+            dataI.iMes -= 12;
+            dataI.iAno++;
+        }
+
+        dias_mes[1] = (bissexto(dataF.iAno))? 29 : 28;
+        dma.qtdDias = (dias_mes[dataI.iMes-1] - dataI.iDia) + dataF.iDia;
+        dma.qtdDias -= (dma.qtdDias >= dias_mes[dataI.iMes - 1])? dias_mes[dataI.iMes - 1] : 0;
 
 
       //se tudo der certo
@@ -158,8 +219,16 @@ DiasMesesAnos q2(char datainicial[], char datafinal[])
  */
 int q3(char *texto, char c, int isCaseSensitive)
 {
-    int qtdOcorrencias = -1;
-
+    int qtdOcorrencias = 0;
+    if (!isCaseSensitive) {
+        c = (c >= 'A' && c <= 'Z') ? c - 'A' + 'a' : c;
+        for (int i = 0; texto[i]; i++)
+            texto[i] = (texto[i] >= 'A' && texto[i] <= 'Z') ? texto[i] - 'A' + 'a' : texto[i];
+    }
+    for(int i = 0; texto[i]; i++){
+        if(texto[i] == c)
+            qtdOcorrencias++;
+    }
     return qtdOcorrencias;
 }
 
@@ -180,8 +249,24 @@ int q3(char *texto, char c, int isCaseSensitive)
  */
 int q4(char *strTexto, char *strBusca, int posicoes[30])
 {
-    int qtdOcorrencias = -1;
+    int qtdOcorrencias = 0;
+    int i, j, k, tam;
+    tratarString(strTexto);
+    tratarString(strBusca);
+    for (tam = 0; strBusca[tam]; tam++);
+    for (i = 0, k = 0; strTexto[i] != '\0'; i++) {
+        for (j = 0; strBusca[j] != '\0'; j++) {
+            if (strTexto[i + j] != strBusca[j]) {
+                break;
+            }
+        }
 
+        if (tam == j) {
+            posicoes[k++] = i + 1;
+            posicoes[k++] = i + tam;
+            qtdOcorrencias++;
+        }
+    }
     return qtdOcorrencias;
 }
 
@@ -197,7 +282,12 @@ int q4(char *strTexto, char *strBusca, int posicoes[30])
 
 int q5(int num)
 {
-
+    int invertido = 0;
+    while (num > 0) {
+        invertido = invertido * 10 + (num % 10);
+        num = num / 10;
+    }
+    num = invertido;
     return num;
 }
 
@@ -213,7 +303,36 @@ int q5(int num)
 
 int q6(int numerobase, int numerobusca)
 {
-    int qtdOcorrencias;
+    int qtdOcorrencias = 0;
+    int i, j;
+    char num_base[10], num_busca[10];
+    numerobase = q5(numerobase);
+    numerobusca = q5(numerobusca);
+    // covertendo para char
+    for (i = 0; numerobase > 0; i++) {
+        num_base[i] = (numerobase % 10) + '0';
+        numerobase /= 10;
+    }
+    num_base[i] = '\0';
+
+    for (i = 0; numerobusca > 0; i++){
+        num_busca[i] = (numerobusca % 10) + '0';
+        numerobusca /= 10;
+    }
+    num_busca[i] = '\0';
+
+    int tam = i;
+    // buscando ocorrencias
+    for (i = 0; num_base[i] != '\0'; i++) {
+        for (j = 0; num_busca[j] != '\0'; j++) {
+            if (num_base[i + j] != num_busca[j])
+                break;
+        }
+        if (tam == j) {
+            qtdOcorrencias++;
+            i += tam - 1;
+        }
+    }
     return qtdOcorrencias;
 }
 
@@ -229,7 +348,64 @@ int q6(int numerobase, int numerobusca)
 
  int q7(char matriz[8][10], char palavra[5])
  {
-     int achou;
+    int achou = 0;
+    int i, j, k, tam_p;
+    char invertido[5];
+    for (tam_p = 0; palavra[tam_p]; tam_p++);
+    for (i = tam_p - 1, j = 0; i >= 0; i--, j++) {
+        invertido[j] = palavra[i];
+    }
+    // sentido horizontal para frente e para trás
+    for (i = 0; i < 8 && !achou; i++) {
+        for (j = 0; j < 10 && !achou; j++) {
+            for (k = 0; k < tam_p; k++) {
+                if (matriz[i][j + k] != palavra[k] && matriz[i][j + k] != invertido[k]) {
+                    break;
+                }
+            }
+            if (k == tam_p)
+                achou = 1;
+        }
+    }
+    // sentido vertical para cima e para baixo
+    for (i = 0; i < 10 && !achou; i++) {
+        for (j = 0; j < 8 && !achou; j++) {
+            for (k = 0; k < tam_p; k++) {
+                if (matriz[j + k][i] != palavra[k] && matriz[j + k][i] != invertido[k]) {
+                    break;
+                }
+            }
+            if (k == tam_p)
+                achou = 1;
+        }
+    }
+    // diagonal
+    for (int l = 0; l < 8 && !achou; l++) {
+        for (int c = 0; c < 10 && !achou; c++) {
+            for (i = l; i < 8 && !achou; i++) {
+                j = c + i + 1;
+                for (k = 0; k < tam_p && j + k < 10; k++) {
+                    if (matriz[i + k][j + k] != palavra[k] && matriz[i + k][j + k] != invertido[k])
+                        break;
+                }
+                if (k == tam_p)
+                    achou = 1;
+            }
+        }
+    }
+    for (int l = 0; l < 8 && !achou; l++) {
+        for (int c = 10 - 1; c >= 0 && !achou; c--) {
+            for (i = l; i < 8 && !achou && j >= 0; i++) {
+                j = c - i;
+                for (k = 0; k < tam_p && j - k > 0; k++) {
+                    if (matriz[i + k][j - k] != palavra[k] && matriz[i + k][j - k] != invertido[k])
+                        break;
+                }
+                if (k == tam_p)
+                    achou = 1;
+            }
+        }
+    }
      return achou;
  }
 
@@ -240,10 +416,10 @@ DataQuebrada quebraData(char data[]){
   char sDia[3];
 	char sMes[3];
 	char sAno[5];
-	int i; 
+	int i;
 
 	for (i = 0; data[i] != '/'; i++){
-		sDia[i] = data[i];	
+		sDia[i] = data[i];
 	}
 	if(i == 1 || i == 2){ // testa se tem 1 ou dois digitos
 		sDia[i] = '\0';  // coloca o barra zero no final
@@ -292,4 +468,30 @@ DataQuebrada quebraData(char data[]){
     
   return dq;
 }
+int bissexto(int ano) {
+    if ((ano % 4 == 0 && ano % 100 != 0) || (ano % 4 == 0 && ano % 400 == 0)) {
+        return 1;
+    }
+    return 0;
+}
+void tratarString(char *texto) {
+    int i, j, tam;
+    char com_acento[] = "ÄÁÂÀÃäáâàãÉÊËÈéêëèÍÎÏÌíîïìÖÓÔÒÕöóôòõÜÚÛÙüúûù";
+    char sem_acento[] = "AAAAAAAAAAaaaaaaaaaaEEEEEEEEeeeeeeeeIIIIIIIIiiiiiiiiOOOOOOOOOOooooooooooUUUUUUUUuuuuuuuu";
+    for(tam = 0; texto[tam] != '\0'; tam++);
+    for(i = 0; texto[i] != '\0'; i++){
+        for(j = 0; com_acento[j] != '\0'; j++) {
+            if(texto[i] == com_acento[j] && texto[i+1] == com_acento[j+1]) {
+                texto[i] = sem_acento[j];
+                for (int k = i + 1; k < tam - 1; k++) {
+                    texto[k] = texto[k+1];
+                }
+                texto[tam - 1] = '\0';
+                tam--;
+                break;
+            }
+        }
+    }
+}
+
 
