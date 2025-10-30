@@ -196,6 +196,7 @@ DiasMesesAnos q2(char datainicial[], char datafinal[])
 
         dias_mes[1] = (bissexto(dataF.iAno))? 29 : 28;
         dma.qtdDias = (dias_mes[dataI.iMes-1] - dataI.iDia) + dataF.iDia;
+        dma.qtdDias += (bissexto(dataI.iAno) && !bissexto(dataF.iAno)) ? 1 : 0;
         dma.qtdDias -= (dma.qtdDias >= dias_mes[dataI.iMes - 1])? dias_mes[dataI.iMes - 1] : 0;
 
 
@@ -223,7 +224,9 @@ int q3(char *texto, char c, int isCaseSensitive)
     char txt_copia[256];
     for (i = 0; texto[i] != '\0'; i++)
         txt_copia[i] = texto[i];
+    tratarString(txt_copia);
     char c_copia = c;
+    tratarString(c_copia);
     if (!isCaseSensitive) {
         c_copia = (c_copia >= 'A' && c_copia <= 'Z') ? c_copia - 'A' + 'a' : c_copia;
         for (i = 0; txt_copia[i] != '\0'; i++)
@@ -269,6 +272,7 @@ int q4(char *strTexto, char *strBusca, int posicoes[30])
             posicoes[k++] = i + 1;
             posicoes[k++] = i + tam;
             qtdOcorrencias++;
+            i++;
         }
     }
     return qtdOcorrencias;
@@ -286,7 +290,7 @@ int q4(char *strTexto, char *strBusca, int posicoes[30])
 
 int q5(int num)
 {
-    int invertido = 0;
+    long long int invertido = 0;
     while (num > 0) {
         invertido = invertido * 10 + (num % 10);
         num = num / 10;
@@ -361,7 +365,7 @@ int q6(int numerobase, int numerobusca)
     }
     // sentido horizontal para frente e para trás
     for (i = 0; i < 8 && !achou; i++) {
-        for (j = 0; j < 10 && !achou; j++) {
+        for (j = 0; j < 10 - tam_p + 1 && !achou; j++) {
             for (k = 0; k < tam_p; k++) {
                 if (matriz[i][j + k] != palavra[k] && matriz[i][j + k] != invertido[k]) {
                     break;
@@ -372,7 +376,7 @@ int q6(int numerobase, int numerobusca)
         }
     }
     // sentido vertical para cima e para baixo
-    for (i = 0; i < 10 && !achou; i++) {
+    for (i = 0; i < 10 - tam_p + 1 && !achou; i++) {
         for (j = 0; j < 8 && !achou; j++) {
             for (k = 0; k < tam_p; k++) {
                 if (matriz[j + k][i] != palavra[k] && matriz[j + k][i] != invertido[k]) {
