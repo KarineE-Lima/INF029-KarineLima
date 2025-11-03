@@ -1,5 +1,0 @@
-cmake_minimum_required(VERSION 3.28)
-project(trabalho1)
-set(CMAKE_CXX_STANDARD 17)
-add_executable(corretor corretor.c trabalho1.c)
-add_executable(novocorretor novoCorretor.c trabalho1.c)
