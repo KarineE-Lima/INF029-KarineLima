@@ -226,7 +226,6 @@ int q3(char *texto, char c, int isCaseSensitive)
         txt_copia[i] = texto[i];
     tratarString(txt_copia);
     char c_copia = c;
-    tratarString(c_copia);
     if (!isCaseSensitive) {
         c_copia = (c_copia >= 'A' && c_copia <= 'Z') ? c_copia - 'A' + 'a' : c_copia;
         for (i = 0; txt_copia[i] != '\0'; i++)
@@ -290,7 +289,7 @@ int q4(char *strTexto, char *strBusca, int posicoes[30])
 
 int q5(int num)
 {
-    long long int invertido = 0;
+    int invertido = 0;
     while (num > 0) {
         invertido = invertido * 10 + (num % 10);
         num = num / 10;
@@ -314,8 +313,7 @@ int q6(int numerobase, int numerobusca)
     int qtdOcorrencias = 0;
     int i, j;
     char num_base[10], num_busca[10];
-    numerobase = q5(numerobase);
-    numerobusca = q5(numerobusca);
+
     // covertendo para char
     for (i = 0; numerobase > 0; i++) {
         num_base[i] = (numerobase % 10) + '0';
