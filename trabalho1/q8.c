@@ -1,16 +1,17 @@
 #include <stdio.h>
+#define DIM 3
 
 void imprime_jogo(char jogo[3][3]);
 int valida_posicao (char jogo[3][3], char posicao[]);
 int ganha_jogo(char jogo[3][3]);
 
 int main() {
-    char jogo[3][3];
-    char posicao[3];
+    char jogo[DIM][DIM];
+    char posicao[DIM];
     char jogador;
     int i, j, round = 0;
-    for (i = 0; i < 3; i++) {
-        for (j = 0; j < 3; j++) {
+    for (i = 0; i < DIM; i++) {
+        for (j = 0; j < DIM; j++) {
             jogo[i][j] = ' ';
         }
     }
@@ -21,7 +22,7 @@ int main() {
 
         do {
             printf("Informe a posição: ");
-            fgets(posicao, 3, stdin);
+            fgets(posicao, DIM, stdin);
             fflush(stdin);
 
             if (!valida_posicao(jogo, posicao))
@@ -59,17 +60,17 @@ int main() {
     return 0;
 }
 
-void imprime_jogo(char jogo[3][3]) {
+void imprime_jogo(char jogo[DIM][DIM]) {
     int i, j, k;
     char linha;
-    for (i = 0, linha = 'A'; i < 3; i++, linha++) {
+    for (i = 0, linha = 'A'; i < DIM; i++, linha++) {
         if (i == 0) {
-            for (k = 0; k < 3; k++) {
+            for (k = 0; k < DIM; k++) {
                 printf("    %d", k + 1);
             }
             printf("\n");
         }
-        for (j = 0; j < 3; j++) {
+        for (j = 0; j < DIM; j++) {
             if (j == 0)
                 printf("%c ", linha);
             printf("| %c ", jogo[i][j]);
@@ -86,17 +87,17 @@ void imprime_jogo(char jogo[3][3]) {
         printf("\n");
     }
 }
-int valida_posicao (char jogo[3][3], char *posicao) {
+int valida_posicao (char jogo[DIM][DIM], char *posicao) {
     if (posicao[0] < 'A' || posicao[0] > 'C') return 0;
     if (posicao[1] < '1' || posicao[1] > '3') return 0;
     if (jogo[posicao[0] - 'A'][posicao[1] - '0' - 1] != ' ') return 2;
     return 1;
 }
-int ganha_jogo(char jogo[3][3]) {
+int ganha_jogo(char jogo[DIM][DIM]) {
     int i, j, k;
     char jogador1[] = {'X', 'X', 'X'};
     char jogador2[] = {'O', 'O', 'O'};
-    for (i = 0; i < 3; i++) {
+    for (i = 0; i < DIM; i++) {
         // Jogador 1
         // Horizontal
         for (j = 0; jogo[i][j] == jogador1[j]; j++);
@@ -107,11 +108,11 @@ int ganha_jogo(char jogo[3][3]) {
         if (j == 3)
             return 1;
         // Diagonal principal
-        for (j = 0;jogo[j][j] == jogador1[j] && j < 3; j++);
+        for (j = 0;jogo[j][j] == jogador1[j] && j < DIM; j++);
         if (j == 3)
             return 1;
         // Diagonal secundária
-        for (j = 0;jogo[j][2-j] == jogador1[j] && j < 3; j++);
+        for (j = 0;jogo[j][2-j] == jogador1[j] && j < DIM; j++);
         if (j == 3)
             return 1;
         // Jogador 2
@@ -124,11 +125,11 @@ int ganha_jogo(char jogo[3][3]) {
         if (k == 3)
             return 2;
         // Diagonal principal
-        for (k = 0; jogo[k][k] == jogador2[k] && k < 3; k++);
+        for (k = 0; jogo[k][k] == jogador2[k] && k < DIM; k++);
         if (k == 3)
             return 2;
         // Diagonal secundária
-        for (k = 0; jogo[k][2-k] == jogador2[k] && k < 3; k++);
+        for (k = 0; jogo[k][2-k] == jogador2[k] && k < DIM; k++);
         if (k == 3)
             return 2;
     }
