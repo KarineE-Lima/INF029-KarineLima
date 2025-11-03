@@ -401,10 +401,10 @@ int q6(int numerobase, int numerobusca)
         }
     }
     for (int l = 0; l < 8 && !achou; l++) {
-        for (int c = tam_p - 1; c < 10 && !achou; c++) {
-            for (i = l; i < 8 && !achou && j >= 0; i++) {
-                for (j = c; j < 10 && !achou; j++) {
-                    for (k = 0; k < tam_p && j - k > 0; k++) {
+        for (int c = 10 - 1; c >= 0 && !achou; c--) {
+            for (i = l; i < 8 && !achou; i++) {
+                for (j = c; j >= 0 && !achou; j--) {
+                    for (k = 0; k < tam_p; k++) {
                         if (matriz[i + k][j - k] != palavra[k] && matriz[i + k][j - k] != invertido[k])
                             break;
                     }
