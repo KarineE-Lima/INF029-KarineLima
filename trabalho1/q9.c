@@ -1,18 +1,31 @@
 #include <stdio.h>
+#include <string.h>
 #define DIM 10
 
 typedef struct bat{
     char tabuleiro[DIM][DIM];
-    char barco4[4];
-    char barco3[3];
-    char barco1[1];
 }batalha;
 
 int qtd_barco_tam4 = 1;
 int qtd_barco_tam3 = 1;
 int qtd_barco_tam1 = 3;
 
+/*
+ * [V] Criar a função imprime_jogo
+ * [V] Criar a função add_barco
+ * [V] Criar a função valida_posição
+ * [V] Criar a função converte_posição
+ * [V] Criar a função ganha_jogo
+ * [ ] Criar uma cópia de cada matriz sem os barcos, mas com as jogadas certas e erradas - função
+ * [ ] Criar a função atira (ou deixa no main) - se atirar certo pode atirar de novo, caso contrário,
+ * passa para outro jogador - usar a valida posição para validar a jogada
+ * [ ] Criar a espaço para jogador1 e jogador2
+ */
 void imprime_jogo(char jogo[DIM][DIM]);
+void add_barco(char jogo[DIM][DIM]);
+int valida_posicao(char *pos, char jogo[DIM][DIM], int tam);
+void converte_posicao(char *pos, int *ini, int *fim, int tam);
+int ganha_jogo(char jogo[DIM][DIM]);
 
 int main() {
     batalha jogador1;
@@ -24,6 +37,7 @@ int main() {
         }
     }
     imprime_jogo(jogador1.tabuleiro);
+    add_barco(jogador1.tabuleiro);
 
     return 0;
 }
@@ -34,7 +48,7 @@ void imprime_jogo(char jogo[DIM][DIM]) {
 
         if (i == 0) {
             for (k = 0; k < DIM; k++)
-                printf("  %d ", k + 1);
+                printf("   %d", k + 1);
             printf("\n");
         }
 
@@ -50,4 +64,139 @@ void imprime_jogo(char jogo[DIM][DIM]) {
         }
         printf("\n");
     }
+}
+void add_barco(char jogo[DIM][DIM]) {
+
+    char posicoes[8];
+    int pi[2], pf[2];
+    int i, j;
+    do {
+        printf("Insira a posição inicial e final do barco de tamanho 4: ");
+        fgets(posicoes, 8, stdin);
+        fflush(stdin);
+        if (!valida_posicao(posicoes, jogo, 4))
+            printf("Insira uma posição válida!\n");
+        if (valida_posicao(posicoes, jogo, 4) == 2)
+            printf("Posição já ocupada!\n");
+
+    } while (!valida_posicao(posicoes, jogo, 4) || valida_posicao(posicoes, jogo, 4) == 2);
+    converte_posicao(posicoes, pi, pf, 4);
+    for (i = pi[0]; i <= pf[0]; i++) {
+        for (j = pi[1]; j <= pf[1]; j++) {
+            jogo[i][j] = 'N';
+        }
+    }
+    imprime_jogo(jogo);
+    do {
+        printf("Insira a posição inicial e final do barco de tamanho 3: ");
+        fgets(posicoes, 8, stdin);
+        fflush(stdin);
+        if (!valida_posicao(posicoes, jogo, 3))
+            printf("Insira uma posição válida!\n");
+        if (valida_posicao(posicoes, jogo, 3) == 2)
+            printf("Posição já ocupada!\n");
+    } while (!valida_posicao(posicoes, jogo, 3) || valida_posicao(posicoes, jogo, 3) == 2);
+
+    converte_posicao(posicoes, pi, pf, 3);
+    for (i = pi[0]; i <= pf[0]; i++) {
+        for (j = pi[1]; j <= pf[1]; j++) {
+            jogo[i][j] = 'N';
+        }
+    }
+    imprime_jogo(jogo);
+
+    for (int k = 0; k < qtd_barco_tam1; k++) {
+        do {
+            printf("Insira a posição do barco de tamanho 1: ");
+            fgets(posicoes, 8, stdin);
+            fflush(stdin);
+            if (!valida_posicao(posicoes, jogo, 1))
+                printf("Insira uma posição válida!\n");
+            if (valida_posicao(posicoes, jogo, 1) == 2)
+                printf("Posição já ocupada!\n");
+        } while (!valida_posicao(posicoes, jogo, 1) || valida_posicao(posicoes, jogo, 1) == 2);
+        converte_posicao(posicoes, pi, pf, 1);
+        for (i = pi[0]; i <= pf[0]; i++) {
+            for (j = pi[1]; j <= pf[1]; j++) {
+                jogo[i][j] = 'N';
+            }
+        }
+        imprime_jogo(jogo);
+    }
+}
+int valida_posicao(char *pos, char jogo[DIM][DIM], int tam) {
+    /*Criar função valida posição
+     * recebe a posição, o tabuleiro e o tamanho do barco
+     * valida o valor da posição
+     * vê se a distância é o tamanho dos barcos -1
+     * verifica se a posição está ocupada
+     * 0 - se posição inválida, 1 - se posição vazia, 2 - se posição preenchida por barco, 3 - se estiver atingida
+     */
+    int pi[2], pf[2];
+
+    if ((strlen(pos) < 2 || strlen(pos) > 4) && tam == 1) return 0;
+
+    int i = 0, j = 0;
+    converte_posicao(pos, pi, pf, tam);
+
+
+    if ((pi[0] < 0 || pi[0] > 9) || (pi[1] < 0 || pi[1] > 9)) return 0;
+
+    if ((pf[0] < 0 || pf[0] > 9) || (pf[1] < 0 || pf[1] > 9)) return 0;
+
+    if (pi[0] != pf[0] && pi[1] != pf[1]) return 0;
+
+    if ((pi[0] == pf[0] && pf[1] - pi[1] != tam - 1) || (pi[1] == pf[1] && pf[0] - pi[0] != tam - 1)) return 0;
+
+    for (i = pi[0]; i <= pf[0]; i++) {
+        for (j = pi[1]; j <= pf[1]; j++) {
+            if (jogo[i][j] == 'N') return 2;
+            if (jogo[i][j] == 'X' || jogo[i][j] == 'O') return 3;
+        }
+    }
+    return 1;
+
+}
+void converte_posicao(char *pos, int *ini, int *fim, int tam) {
+    /* criar função converte
+     * recebe a posicao, dois vetores e o tamanho do barco
+     * converte para um vetor com as posições reais da matriz
+     */
+    int i = 0, j = 0;
+    ini[j++] = pos[i++] - 'A';
+    ini[j] = 0;
+
+    while (pos[i] != ' ' && pos[i] != '\0' && pos[i] != '\n')
+        ini[j] = (ini[j] * 10) + (pos[i++] - '0');
+
+    ini[j] -= 1;
+
+    if (tam > 1) {
+        i++;
+        j = 0;
+
+        fim[j++] = pos[i++] - 'A';
+        fim[j] = 0;
+        while (pos[i] != ' ' && pos[i] != '\0' && pos[i] != '\n')
+            fim[j] = (fim[j] * 10) + (pos[i++] - '0');
+
+        fim[j] -= 1;
+
+    } else {
+        fim[0] = ini[0];
+        fim[1] = ini[1];
+    }
+
+}
+int ganha_jogo(char jogo[DIM][DIM]) {
+    /*
+     * se houver algum navio ele retorna 0, senão ele retorna 1
+     */
+    for (int i = 0; i < DIM; i++) {
+        for (int j = 0; j < DIM; j++) {
+            if (jogo[i][j] == 'N')
+                return 0;
+        }
+    }
+    return 1;
 }
