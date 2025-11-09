@@ -312,31 +312,29 @@ int q6(int numerobase, int numerobusca)
 {
     int qtdOcorrencias = 0;
     int i, j;
-    char num_base[10], num_busca[10];
+    int num_base[20], num_busca[20];
 
-    // covertendo para char
+    // transferindo para vetor
     for (i = 0; numerobase > 0; i++) {
-        num_base[i] = (numerobase % 10) + '0';
+        num_base[i] = (numerobase % 10);
         numerobase /= 10;
     }
-    num_base[i] = '\0';
+    int tam_base = i;
 
     for (i = 0; numerobusca > 0; i++){
-        num_busca[i] = (numerobusca % 10) + '0';
+        num_busca[i] = (numerobusca % 10);
         numerobusca /= 10;
     }
-    num_busca[i] = '\0';
-
-    int tam = i;
+    int tam_busca = i;
     // buscando ocorrencias
-    for (i = 0; num_base[i] != '\0'; i++) {
-        for (j = 0; num_busca[j] != '\0'; j++) {
+    for (i = 0; i < tam_base; i++) {
+        for (j = 0; j < tam_busca; j++) {
             if (num_base[i + j] != num_busca[j])
                 break;
         }
-        if (tam == j) {
+        if (tam_busca == j) {
             qtdOcorrencias++;
-            i += tam - 1;
+            i += tam_busca - 1;
         }
     }
     return qtdOcorrencias;
