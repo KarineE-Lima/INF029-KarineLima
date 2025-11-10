@@ -239,13 +239,14 @@ void atira(char jogoT[DIM][DIM], char jogoA[DIM][DIM]) {
             jogoA[ini[0]][ini[1]] = 'O';
             imprime_jogo(jogoA);
         }
-        if (valida_posicao(posicao, jogoT, 1) == 1) {
+        
+    } while ((!valida_posicao(posicao, jogoT, 1) || valida_posicao(posicao, jogoT, 1) == 3
+        || valida_posicao(posicao, jogoT, 1) == 2));
+    if (valida_posicao(posicao, jogoT, 1) == 1) {
             converte_posicao(posicao, ini, fim, 1);
             jogoT[ini[0]][ini[1]] = 'X';
             jogoA[ini[0]][ini[1]] = 'X';
             imprime_jogo(jogoA);
         }
-    } while ((!valida_posicao(posicao, jogoT, 1) || valida_posicao(posicao, jogoT, 1) == 3
-        || valida_posicao(posicao, jogoT, 1) == 2));
 
 }
