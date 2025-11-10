@@ -4,6 +4,7 @@
 
 typedef struct bat{
     char tabuleiro[DIM][DIM];
+    char jogada[DIM][DIM];
 }batalha;
 
 int qtd_barco_tam4 = 1;
@@ -16,8 +17,8 @@ int qtd_barco_tam1 = 3;
  * [V] Criar a função valida_posição
  * [V] Criar a função converte_posição
  * [V] Criar a função ganha_jogo
- * [ ] Criar uma cópia de cada matriz sem os barcos, mas com as jogadas certas e erradas - função
- * [ ] Criar a função atira (ou deixa no main) - se atirar certo pode atirar de novo, caso contrário,
+ * [V] Criar uma cópia de cada matriz sem os barcos, mas com as jogadas certas e erradas - dentro da struct
+ * [V] Criar a função atira (ou deixa no main) - se atirar certo pode atirar de novo, caso contrário,
  * passa para outro jogador - usar a valida posição para validar a jogada
  * [ ] Criar a espaço para jogador1 e jogador2
  */
@@ -26,18 +27,37 @@ void add_barco(char jogo[DIM][DIM]);
 int valida_posicao(char *pos, char jogo[DIM][DIM], int tam);
 void converte_posicao(char *pos, int *ini, int *fim, int tam);
 int ganha_jogo(char jogo[DIM][DIM]);
+void atira(char jogoT[DIM][DIM], char jogoA[DIM][DIM]);
 
 int main() {
     batalha jogador1;
     batalha jogador2;
+
     for (int i = 0; i < DIM; i++) {
         for (int j = 0; j < DIM; j++) {
             jogador1.tabuleiro[i][j] = ' ';
+            jogador1.jogada[i][j] = ' ';
             jogador2.tabuleiro[i][j] = ' ';
+            jogador2.jogada[i][j] = ' ';
         }
     }
+    printf("------------- Vez do jogador 1 ----------------\n");
     imprime_jogo(jogador1.tabuleiro);
     add_barco(jogador1.tabuleiro);
+    printf("------------- Vez do jogador 2 ----------------\n");
+    imprime_jogo(jogador2.tabuleiro);
+    add_barco(jogador2.tabuleiro);
+
+    while (!ganha_jogo(jogador1.tabuleiro) && !ganha_jogo(jogador2.tabuleiro)) {
+        printf("------------- Vez do jogador 1 ----------------\n");
+        atira(jogador2.tabuleiro, jogador1.jogada);
+        printf("------------- Vez do jogador 2 ----------------\n");
+        atira(jogador1.tabuleiro, jogador2.jogada);
+        if (ganha_jogo(jogador1.tabuleiro))
+            printf("Jogador 2 venceu!\n");
+        if (ganha_jogo(jogador2.tabuleiro))
+            printf("Jogador 1 venceu!\n");
+    }
 
     return 0;
 }
@@ -199,4 +219,33 @@ int ganha_jogo(char jogo[DIM][DIM]) {
         }
     }
     return 1;
+}
+void atira(char jogoT[DIM][DIM], char jogoA[DIM][DIM]) {
+    char posicao[4];
+    int ini[2], fim[2];
+    do {
+        printf("Insira a posição que você quer atirar: ");
+        fgets(posicao, 4, stdin);
+        fflush(stdin);
+        if (!valida_posicao(posicao, jogoT, 1))
+            printf("Insira uma posição válida!\n");
+
+        if (valida_posicao(posicao, jogoT, 1) == 3)
+            printf("Posição já escolhida!\n");
+
+        if (valida_posicao(posicao, jogoT, 1) == 2) {
+            converte_posicao(posicao, ini, fim, 1);
+            jogoT[ini[0]][ini[1]] = 'O';
+            jogoA[ini[0]][ini[1]] = 'O';
+            imprime_jogo(jogoA);
+        }
+        if (valida_posicao(posicao, jogoT, 1) == 1) {
+            converte_posicao(posicao, ini, fim, 1);
+            jogoT[ini[0]][ini[1]] = 'X';
+            jogoA[ini[0]][ini[1]] = 'X';
+            imprime_jogo(jogoA);
+        }
+    } while ((!valida_posicao(posicao, jogoT, 1) || valida_posicao(posicao, jogoT, 1) == 3
+        || valida_posicao(posicao, jogoT, 1) == 2));
+
 }
