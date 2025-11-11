@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #define DIM 10
 
@@ -44,14 +45,20 @@ int main() {
     printf("------------- Vez do jogador 1 ----------------\n");
     imprime_jogo(jogador1.tabuleiro);
     add_barco(jogador1.tabuleiro);
+    system("cls");
     printf("------------- Vez do jogador 2 ----------------\n");
     imprime_jogo(jogador2.tabuleiro);
     add_barco(jogador2.tabuleiro);
+    system("cls");
 
     while (!ganha_jogo(jogador1.tabuleiro) && !ganha_jogo(jogador2.tabuleiro)) {
         printf("------------- Vez do jogador 1 ----------------\n");
+        printf("Seu tabuleiro: \n");
+        imprime_jogo(jogador1.tabuleiro);
         atira(jogador2.tabuleiro, jogador1.jogada);
         printf("------------- Vez do jogador 2 ----------------\n");
+        printf("Seu tabuleiro: \n");
+        imprime_jogo(jogador1.tabuleiro);
         atira(jogador1.tabuleiro, jogador2.jogada);
         if (ganha_jogo(jogador1.tabuleiro))
             printf("Jogador 2 venceu!\n");
