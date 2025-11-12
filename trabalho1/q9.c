@@ -45,10 +45,12 @@ int main() {
     printf("------------- Vez do jogador 1 ----------------\n");
     imprime_jogo(jogador1.tabuleiro);
     add_barco(jogador1.tabuleiro);
+    system("pause");
     system("cls");
     printf("------------- Vez do jogador 2 ----------------\n");
     imprime_jogo(jogador2.tabuleiro);
     add_barco(jogador2.tabuleiro);
+    system("pause");
     system("cls");
 
     while (!ganha_jogo(jogador1.tabuleiro) && !ganha_jogo(jogador2.tabuleiro)) {
@@ -56,15 +58,20 @@ int main() {
         printf("Seu tabuleiro: \n");
         imprime_jogo(jogador1.tabuleiro);
         atira(jogador2.tabuleiro, jogador1.jogada);
+        system("pause");
+        system("cls");
         printf("------------- Vez do jogador 2 ----------------\n");
         printf("Seu tabuleiro: \n");
-        imprime_jogo(jogador1.tabuleiro);
+        imprime_jogo(jogador2.tabuleiro);
         atira(jogador1.tabuleiro, jogador2.jogada);
+        system("pause");
+        system("cls");
         if (ganha_jogo(jogador1.tabuleiro))
             printf("Jogador 2 venceu!\n");
         if (ganha_jogo(jogador2.tabuleiro))
             printf("Jogador 1 venceu!\n");
     }
+    system("pause");
 
     return 0;
 }
@@ -246,6 +253,8 @@ void atira(char jogoT[DIM][DIM], char jogoA[DIM][DIM]) {
             jogoA[ini[0]][ini[1]] = 'O';
             imprime_jogo(jogoA);
         }
+        if (ganha_jogo(jogoT))
+            break;
         
     } while ((!valida_posicao(posicao, jogoT, 1) || valida_posicao(posicao, jogoT, 1) == 3
         || valida_posicao(posicao, jogoT, 1) == 2));
