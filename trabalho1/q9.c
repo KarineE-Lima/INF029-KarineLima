@@ -21,7 +21,7 @@ int qtd_barco_tam1 = 3;
  * [V] Criar uma cópia de cada matriz sem os barcos, mas com as jogadas certas e erradas - dentro da struct
  * [V] Criar a função atira (ou deixa no main) - se atirar certo pode atirar de novo, caso contrário,
  * passa para outro jogador - usar a valida posição para validar a jogada
- * [ ] Criar a espaço para jogador1 e jogador2
+ * [V] Criar o espaço para jogador1 e jogador2
  */
 void imprime_jogo(char jogo[DIM][DIM]);
 void add_barco(char jogo[DIM][DIM]);
@@ -29,6 +29,16 @@ int valida_posicao(char *pos, char jogo[DIM][DIM], int tam);
 void converte_posicao(char *pos, int *ini, int *fim, int tam);
 int ganha_jogo(char jogo[DIM][DIM]);
 void atira(char jogoT[DIM][DIM], char jogoA[DIM][DIM]);
+void limpatela()
+{
+    printf("Enter para continuar...\n");
+    while ((getchar()) != '\n');
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
 
 int main() {
     batalha jogador1;
@@ -43,35 +53,57 @@ int main() {
         }
     }
     printf("------------- Vez do jogador 1 ----------------\n");
+
     imprime_jogo(jogador1.tabuleiro);
     add_barco(jogador1.tabuleiro);
-    system("pause");
-    system("cls");
+
+    limpatela();
+
     printf("------------- Vez do jogador 2 ----------------\n");
+
     imprime_jogo(jogador2.tabuleiro);
     add_barco(jogador2.tabuleiro);
-    system("pause");
-    system("cls");
+    
+    limpatela();
 
     while (!ganha_jogo(jogador1.tabuleiro) && !ganha_jogo(jogador2.tabuleiro)) {
+
         printf("------------- Vez do jogador 1 ----------------\n");
+
         printf("Seu tabuleiro: \n");
         imprime_jogo(jogador1.tabuleiro);
+
         atira(jogador2.tabuleiro, jogador1.jogada);
-        system("pause");
-        system("cls");
+
+        limpatela();
+
+        if (ganha_jogo(jogador2.tabuleiro)){
+            printf("Jogador 1 venceu!\n");
+            imprime_jogo(jogador1.tabuleiro);
+            imprime_jogo(jogador2.tabuleiro);
+            break;
+        }
+
         printf("------------- Vez do jogador 2 ----------------\n");
+
         printf("Seu tabuleiro: \n");
         imprime_jogo(jogador2.tabuleiro);
+
         atira(jogador1.tabuleiro, jogador2.jogada);
-        system("pause");
-        system("cls");
+
+        limpatela();
+
         if (ganha_jogo(jogador1.tabuleiro))
+        {
             printf("Jogador 2 venceu!\n");
-        if (ganha_jogo(jogador2.tabuleiro))
-            printf("Jogador 1 venceu!\n");
+            imprime_jogo(jogador1.tabuleiro);
+            imprime_jogo(jogador2.tabuleiro);
+            break;
+        }
+
     }
-    system("pause");
+    printf("Enter para Finalizar...\n");
+    while ((getchar()) != '\n');
 
     return 0;
 }
@@ -100,20 +132,29 @@ void imprime_jogo(char jogo[DIM][DIM]) {
     }
 }
 void add_barco(char jogo[DIM][DIM]) {
+    /*
+     * Solicita a posição inicial e final do barco
+     * Chama a posição valida para validar
+     * Se válido, chama a função converte para coverter as posições
+     * Se não, avisa ao usuário e solicita novamente
+     */
 
     char posicoes[8];
     int pi[2], pf[2];
     int i, j;
+
     do {
         printf("Insira a posição inicial e final do barco de tamanho 4: ");
         fgets(posicoes, 8, stdin);
         fflush(stdin);
+
         if (!valida_posicao(posicoes, jogo, 4))
             printf("Insira uma posição válida!\n");
         if (valida_posicao(posicoes, jogo, 4) == 2)
             printf("Posição já ocupada!\n");
 
     } while (!valida_posicao(posicoes, jogo, 4) || valida_posicao(posicoes, jogo, 4) == 2);
+
     converte_posicao(posicoes, pi, pf, 4);
     for (i = pi[0]; i <= pf[0]; i++) {
         for (j = pi[1]; j <= pf[1]; j++) {
@@ -192,7 +233,7 @@ int valida_posicao(char *pos, char jogo[DIM][DIM], int tam) {
 
 }
 void converte_posicao(char *pos, int *ini, int *fim, int tam) {
-    /* criar função converte
+    /*
      * recebe a posicao, dois vetores e o tamanho do barco
      * converte para um vetor com as posições reais da matriz
      */
@@ -235,6 +276,13 @@ int ganha_jogo(char jogo[DIM][DIM]) {
     return 1;
 }
 void atira(char jogoT[DIM][DIM], char jogoA[DIM][DIM]) {
+    /*
+     * recebe o jogo do adversário e a tabela de jogadas do jogador atual
+     * solicita ao usuário a posição que ele quer atirar
+     * chama a valida posição para informar se a posição existe, está ocupada ou se tem barco
+     * imprime O se acertou
+     * imprime X se não acertou
+     */
     char posicao[4];
     int ini[2], fim[2];
     do {
