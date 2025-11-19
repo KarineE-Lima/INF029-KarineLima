@@ -372,8 +372,8 @@ int q6(int numerobase, int numerobusca)
         }
     }
     // sentido vertical para cima e para baixo
-    for (i = 0; i < 10 - tam_p + 1 && !achou; i++) {
-        for (j = 0; j < 8 && !achou; j++) {
+    for (i = 0; i < 10 && !achou; i++) {
+        for (j = 0; j < 8 - tam_p + 1 && !achou; j++) {
             for (k = 0; k < tam_p; k++) {
                 if (matriz[j + k][i] != palavra[k] && matriz[j + k][i] != invertido[k]) {
                     break;
@@ -384,10 +384,10 @@ int q6(int numerobase, int numerobusca)
         }
     }
     // diagonal
-    for (int l = 0; l < 8; l++) {
-        for (int c = 0; c < 10; c++) {
-            for (i = l; i < 8 && !achou; i++) {
-                for (j = c; j < 10 && !achou; j++) {
+    for (int l = 0; l < 8 - tam_p && !achou; l++) {
+        for (int c = 0; c < 10 - tam_p && !achou; c++) {
+            for (i = l; i < 8 - tam_p + 1 && !achou; i++) {
+                for (j = c; j < 10 - tam_p + 1 && !achou; j++) {
                     for (k = 0; k < tam_p && j + k < 10; k++) {
                         if (matriz[i + k][j + k] != palavra[k] && matriz[i + k][j + k] != invertido[k])
                             break;
@@ -398,9 +398,9 @@ int q6(int numerobase, int numerobusca)
             }
         }
     }
-    for (int l = 0; l < 8 && !achou; l++) {
+    for (int l = 0; l < 8 - tam_p && !achou; l++) {
         for (int c = 10 - 1; c >= 0 && !achou; c--) {
-            for (i = l; i < 8 && !achou; i++) {
+            for (i = l; i < 8 - tam_p + 1 && !achou; i++) {
                 for (j = c; j >= 0 && !achou; j--) {
                     for (k = 0; k < tam_p; k++) {
                         if (matriz[i + k][j - k] != palavra[k] && matriz[i + k][j - k] != invertido[k])
