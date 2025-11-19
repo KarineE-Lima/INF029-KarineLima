@@ -4,6 +4,7 @@
 void imprime_jogo(char jogo[3][3]);
 int valida_posicao (char jogo[3][3], char posicao[]);
 int ganha_jogo(char jogo[3][3]);
+void limpa_buffer();
 
 int main() {
     char jogo[DIM][DIM];
@@ -19,11 +20,11 @@ int main() {
     while (!ganha_jogo(jogo) && round < 9) {
         imprime_jogo(jogo);
         jogador = (round % 2 == 0)? 'X' : 'O';
-
+        printf("-------Vez do Jogador %d--------\n", (round%2) + 1);
         do {
-            printf("Informe a posição: ");
+            printf("Informe a posição do %c: ", jogador);
             fgets(posicao, DIM, stdin);
-            fflush(stdin);
+            limpa_buffer();
 
             if (!valida_posicao(jogo, posicao))
                 printf("Insira uma posição válida!\n");
@@ -108,11 +109,11 @@ int ganha_jogo(char jogo[DIM][DIM]) {
         if (j == 3)
             return 1;
         // Diagonal principal
-        for (j = 0;jogo[j][j] == jogador1[j] && j < DIM; j++);
+        for (j = 0; jogo[j][j] == jogador1[j] && j < DIM; j++);
         if (j == 3)
             return 1;
         // Diagonal secundária
-        for (j = 0;jogo[j][2-j] == jogador1[j] && j < DIM; j++);
+        for (j = 0; jogo[j][2-j] == jogador1[j] && j < DIM; j++);
         if (j == 3)
             return 1;
         // Jogador 2
@@ -134,4 +135,13 @@ int ganha_jogo(char jogo[DIM][DIM]) {
             return 2;
     }
     return 0;
+}
+void limpa_buffer()
+{
+#ifdef _WIN32
+    fflush(stdin);
+#else
+    int c;
+    while ((c = getchar()) != EOF && c != '\n');
+#endif
 }

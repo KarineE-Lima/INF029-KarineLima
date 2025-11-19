@@ -29,16 +29,8 @@ int valida_posicao(char *pos, char jogo[DIM][DIM], int tam);
 void converte_posicao(char *pos, int *ini, int *fim, int tam);
 int ganha_jogo(char jogo[DIM][DIM]);
 void atira(char jogoT[DIM][DIM], char jogoA[DIM][DIM]);
-void limpatela()
-{
-    printf("Enter para continuar...\n");
-    while ((getchar()) != '\n');
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
-}
+void limpatela();
+void limpa_buffer();
 
 int main() {
     batalha jogador1;
@@ -63,7 +55,7 @@ int main() {
 
     imprime_jogo(jogador2.tabuleiro);
     add_barco(jogador2.tabuleiro);
-    
+
     limpatela();
 
     while (!ganha_jogo(jogador1.tabuleiro) && !ganha_jogo(jogador2.tabuleiro)) {
@@ -146,7 +138,7 @@ void add_barco(char jogo[DIM][DIM]) {
     do {
         printf("Insira a posição inicial e final do barco de tamanho 4: ");
         fgets(posicoes, 8, stdin);
-        fflush(stdin);
+        limpa_buffer();
 
         if (!valida_posicao(posicoes, jogo, 4))
             printf("Insira uma posição válida!\n");
@@ -165,7 +157,8 @@ void add_barco(char jogo[DIM][DIM]) {
     do {
         printf("Insira a posição inicial e final do barco de tamanho 3: ");
         fgets(posicoes, 8, stdin);
-        fflush(stdin);
+        limpa_buffer();
+
         if (!valida_posicao(posicoes, jogo, 3))
             printf("Insira uma posição válida!\n");
         if (valida_posicao(posicoes, jogo, 3) == 2)
@@ -184,13 +177,18 @@ void add_barco(char jogo[DIM][DIM]) {
         do {
             printf("Insira a posição do barco de tamanho 1: ");
             fgets(posicoes, 8, stdin);
-            fflush(stdin);
+            limpa_buffer();
+
             if (!valida_posicao(posicoes, jogo, 1))
                 printf("Insira uma posição válida!\n");
+
             if (valida_posicao(posicoes, jogo, 1) == 2)
                 printf("Posição já ocupada!\n");
+
         } while (!valida_posicao(posicoes, jogo, 1) || valida_posicao(posicoes, jogo, 1) == 2);
+
         converte_posicao(posicoes, pi, pf, 1);
+
         for (i = pi[0]; i <= pf[0]; i++) {
             for (j = pi[1]; j <= pf[1]; j++) {
                 jogo[i][j] = 'N';
@@ -288,7 +286,8 @@ void atira(char jogoT[DIM][DIM], char jogoA[DIM][DIM]) {
     do {
         printf("Insira a posição que você quer atirar: ");
         fgets(posicao, 4, stdin);
-        fflush(stdin);
+        //fflush(stdin);
+        limpa_buffer();
         if (!valida_posicao(posicao, jogoT, 1))
             printf("Insira uma posição válida!\n");
 
@@ -312,5 +311,25 @@ void atira(char jogoT[DIM][DIM], char jogoA[DIM][DIM]) {
             jogoA[ini[0]][ini[1]] = 'X';
             imprime_jogo(jogoA);
         }
+
+}
+void limpatela()
+{
+    printf("Enter para continuar...\n");
+    while ((getchar()) != '\n');
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+void limpa_buffer()
+{
+#ifdef _WIN32
+    fflush(stdin);
+#else
+    int c;
+    while ((c = getchar()) != EOF && c != '\n');
+#endif
 
 }
