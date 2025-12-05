@@ -346,7 +346,7 @@ int modificarTamanhoEstruturaAuxiliar(int posicao, int novoTamanho)
     {
         vetorPrincipal[posicao].tamanho += novoTamanho;
         if (vetorPrincipal[posicao].tamanho < vetorPrincipal[posicao].qtd)
-            vetorPrincipal[posicao].qtd += novoTamanho;
+            vetorPrincipal[posicao].qtd = vetorPrincipal[posicao].tamanho;
         vetorPrincipal[posicao].valores = realloc(vetorPrincipal[posicao].valores, vetorPrincipal[posicao].tamanho);
         retorno = SUCESSO;
     }
