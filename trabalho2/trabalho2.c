@@ -41,7 +41,7 @@ int BuscaValor(int posicao, int valor)
     }
     return -1;
 }
-int get_tam(Ponto *vet){
+int get_qtd(Ponto *vet){
     int tam = 0;
     for(int i = 0; i < TAM; i++){
         tam += vet[i].qtd;
@@ -312,11 +312,8 @@ int getDadosOrdenadosDeTodasEstruturasAuxiliares(int vetorAux[])
 {
 
     int retorno = 0;
-    /*int tam = 0;
-    for (int i = 0; i < TAM; i++)
-       tam += vetorPrincipal[i].qtd;*/
     retorno = getDadosDeTodasEstruturasAuxiliares(vetorAux);
-    ordena_vetor(vetorAux, get_tam(vetorPrincipal));
+    ordena_vetor(vetorAux, get_qtd(vetorPrincipal));
     return retorno;
 }
 
@@ -407,13 +404,14 @@ No *montarListaEncadeadaComCabecote()
 {
     No *inicioLista = (No*) malloc(sizeof(No));
     inicioLista->prox = NULL;
-    int tamanho = get_tam(vetorPrincipal);
+    int tamanho = get_qtd(vetorPrincipal);
     int *todos = malloc(tamanho * sizeof(int));
     int retorno = getDadosDeTodasEstruturasAuxiliares(todos);
     for (int i = 0; i < tamanho; i++)
     {
         Inserir(inicioLista, todos[i]);
     }
+    free(todos);
     if (retorno == SUCESSO)
         return inicioLista;
 
